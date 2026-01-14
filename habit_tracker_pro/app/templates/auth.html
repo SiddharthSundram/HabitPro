@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="max-w-md mx-auto bg-white rounded-xl shadow-md overflow-hidden md:max-w-2xl mt-10">
+    <div class="md:flex">
+        <div class="p-8 w-full">
+            <h2 class="uppercase tracking-wide text-sm text-indigo-500 font-semibold mb-4">Welcome Back</h2>
+            <form method="POST">
+                <input type="hidden" name="action" value="login">
+                <input type="text" name="username" placeholder="Username" class="w-full p-2 border rounded mb-3" required>
+                <input type="password" name="password" placeholder="Password" class="w-full p-2 border rounded mb-4" required>
+                <button class="w-full bg-indigo-600 text-white p-2 rounded font-bold hover:bg-indigo-700">Login</button>
+            </form>
+            
+            <hr class="my-6">
+            
+            <h2 class="uppercase tracking-wide text-sm text-gray-500 font-semibold mb-4">New User? Create Account</h2>
+            <form method="POST">
+                <input type="hidden" name="action" value="signup">
+                <input type="text" name="username" placeholder="Choose Username" class="w-full p-2 border rounded mb-3" required>
+                <input type="email" name="email" placeholder="Email" class="w-full p-2 border rounded mb-3" required>
+                <input type="password" name="password" placeholder="Password" class="w-full p-2 border rounded mb-4" required>
+                <button class="w-full bg-gray-800 text-white p-2 rounded font-bold hover:bg-black">Sign Up</button>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

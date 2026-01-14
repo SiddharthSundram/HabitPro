@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="max-w-xl mx-auto bg-white p-8 rounded-xl shadow-md">
+    <h2 class="text-2xl font-bold mb-6 text-gray-800">Design Your Habit</h2>
+    
+    <form method="POST">
+        <div class="mb-4">
+            <label class="block text-gray-700 text-sm font-bold mb-2">Habit Name</label>
+            <input type="text" name="name" placeholder="e.g. Read Books" class="w-full p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500" required>
+        </div>
+        
+        <div class="mb-4">
+            <label class="block text-gray-700 text-sm font-bold mb-2">Category</label>
+            <select name="category" class="w-full p-3 border rounded-lg bg-white">
+                <option value="Health">Health & Fitness</option>
+                <option value="Study">Study & Learning</option>
+                <option value="Work">Deep Work</option>
+                <option value="Mindfulness">Mindfulness</option>
+            </select>
+        </div>
+
+        <div class="mb-6 p-4 bg-gray-50 rounded-lg border">
+            <label class="block text-gray-700 text-sm font-bold mb-2">How will you track this?</label>
+            
+            <div class="flex gap-4 mb-4">
+                <label class="flex items-center cursor-pointer">
+                    <input type="radio" name="habit_type" value="boolean" checked onclick="toggleNumeric(false)" class="mr-2">
+                    <span>Yes / No (Checkbox)</span>
+                </label>
+                <label class="flex items-center cursor-pointer">
+                    <input type="radio" name="habit_type" value="numeric" onclick="toggleNumeric(true)" class="mr-2">
+                    <span>Numeric (Target Value)</span>
+                </label>
+            </div>
+
+            <div id="numeric-options" class="hidden grid grid-cols-2 gap-4">
+                <div>
+                    <label class="text-xs font-bold text-gray-500">Target Number</label>
+                    <input type="number" name="target_value" value="1" class="w-full p-2 border rounded">
+                </div>
+                <div>
+                    <label class="text-xs font-bold text-gray-500">Unit (Optional)</label>
+                    <input type="text" name="unit" placeholder="mins, pages, ml" class="w-full p-2 border rounded">
+                </div>
+            </div>
+        </div>
+
+        <button type="submit" class="w-full bg-indigo-600 text-white font-bold py-3 rounded-lg hover:bg-indigo-700 transition">
+            Create Habit
+        </button>
+    </form>
+</div>
+
+<script>
+    function toggleNumeric(show) {
+        const el = document.getElementById('numeric-options');
+        if (show) el.classList.remove('hidden');
+        else el.classList.add('hidden');
+    }
+</script>
+{% endblock %}

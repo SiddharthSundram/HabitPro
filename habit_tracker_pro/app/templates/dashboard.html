@@ -1,0 +1,100 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="flex justify-between items-end mb-8">
+    <div>
+        <h1 class="text-3xl font-bold text-gray-800">Today's Focus</h1>
+        <p class="text-gray-500">{{ today.strftime('%A, %B %d') }}</p>
+    </div>
+</div>
+
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+    {% for habit in habits %}
+    
+    {% set log = log_map.get(habit.id) %}
+    {% set current_val = log.value if log else 0 %}
+    {% set is_done = current_val >= habit.target_value %}
+    
+    {% set color_class = 'border-indigo-500' %}
+    {% if habit.category == 'Health' %}{% set color_class = 'border-green-500' %}{% endif %}
+    {% if habit.category == 'Study' %}{% set color_class = 'border-yellow-500' %}{% endif %}
+
+    <div class="bg-white rounded-xl shadow-sm hover:shadow-md transition p-6 border-t-4 {{ color_class }} relative overflow-hidden group">
+        
+        <div class="flex justify-between items-start mb-4">
+            <div>
+                <span class="text-xs font-bold uppercase text-gray-400 tracking-wider">{{ habit.category }}</span>
+                <h3 class="text-xl font-bold text-gray-800">{{ habit.name }}</h3>
+                <div class="text-xs text-gray-400 mt-1">
+                    🔥 Streak: <span class="text-orange-500 font-bold">{{ habit.current_streak }}</span>
+                </div>
+            </div>
+            
+            {% if is_done %}
+            <div class="bg-green-100 text-green-600 p-2 rounded-full">
+                <i class="fas fa-check"></i>
+            </div>
+            {% endif %}
+        </div>
+
+        <div class="mt-4">
+            <form action="{{ url_for('main.log_habit', habit_id=habit.id) }}" method="POST">
+                
+                <div class="mb-3">
+                    <input type="text" name="note" placeholder="Add a note (optional)..." 
+                           class="w-full text-xs p-2 border-b border-gray-200 focus:border-indigo-500 outline-none bg-transparent placeholder-gray-400"
+                           value="{{ log.note if log and log.note else '' }}">
+                </div>
+
+                {% if habit.habit_type == 'numeric' %}
+                    <div class="flex justify-between text-xs text-gray-400 mb-1">
+                        <span>Progress</span>
+                        <span>{{ current_val }} / {{ habit.target_value }} {{ habit.unit }}</span>
+                    </div>
+                    <div class="w-full bg-gray-100 rounded-full h-2 mb-3">
+                        <div class="bg-indigo-600 h-2 rounded-full transition-all duration-500" style="width: {{ (current_val / habit.target_value * 100)|int }}%"></div>
+                    </div>
+                {% endif %}
+
+                <div class="flex gap-2">
+                    
+                    {% if habit.habit_type == 'boolean' %}
+                        <input type="hidden" name="value" value="1">
+                        <button type="submit" class="flex-grow py-2 rounded-lg font-bold transition text-sm
+                            {% if is_done %} bg-green-50 text-green-600 hover:bg-green-100
+                            {% else %} bg-gray-100 text-gray-600 hover:bg-indigo-600 hover:text-white {% endif %}">
+                            {% if is_done %}
+                                <i class="fas fa-check mr-1"></i> Completed
+                            {% else %}
+                                Mark Complete
+                            {% endif %}
+                        </button>
+
+                    {% else %}
+                        <input type="number" name="value" value="{{ current_val }}" class="w-16 p-2 border rounded text-center text-sm font-bold text-gray-700">
+                        <button type="submit" class="flex-grow bg-gray-800 text-white text-sm font-bold rounded hover:bg-black transition">
+                            Update
+                        </button>
+                    {% endif %}
+
+                    <a href="{{ url_for('main.habit_detail', habit_id=habit.id) }}" 
+                       class="px-3 py-2 bg-indigo-50 text-indigo-600 rounded-lg hover:bg-indigo-100 transition flex items-center justify-center" 
+                       title="View History & Analytics">
+                        <i class="fas fa-chart-bar"></i>
+                    </a>
+
+                </div>
+            </form>
+        </div>
+    </div>
+    {% else %}
+    <div class="col-span-full text-center py-12">
+        <div class="text-gray-300 text-6xl mb-4"><i class="fas fa-seedling"></i></div>
+        <h3 class="text-xl font-bold text-gray-600">No habits yet.</h3>
+        <p class="text-gray-500 mb-6">Start small. Build consistency.</p>
+        <a href="{{ url_for('main.create_habit') }}" class="bg-indigo-600 text-white px-6 py-3 rounded-lg font-bold">Create First Habit</a>
+    </div>
+    {% endfor %}
+</div>
+
+{% endblock %}

@@ -1,0 +1,29 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Virtual Environment
+venv/
+env/
+.env
+
+# Database (VERY IMPORTANT - Do not commit your real data)
+*.db
+*.sqlite3
+instance/
+
+# IDE Settings (VS Code, Pycharm)
+.vscode/
+.idea/
+
+# Mac/Windows junk
+.DS_Store
+Thumbs.db
+
+# Flask
+.flaskenv
+
+models.py
+routes.py
+config.py
