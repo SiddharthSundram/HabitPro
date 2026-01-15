@@ -3,10 +3,7 @@
 
 <div class="max-w-4xl mx-auto">
     
-    <div class="bg-white p-6 rounded-xl shadow-sm mb-6 flex justify-between items-center border-l-4 
-        {% if habit.category == 'Health' %}border-green-500
-        {% elif habit.category == 'Study' %}border-yellow-500
-        {% else %}border-indigo-500{% endif %}">
+    <div class="bg-white rounded-xl shadow-sm hover:shadow-lg transform hover:-translate-y-1 transition-all duration-300 p-6 border-t-4 {{ color_class }} relative overflow-hidden group">
         
         <div>
             <a href="{{ url_for('main.dashboard') }}" class="text-gray-400 hover:text-indigo-600 mb-2 inline-block transition">
@@ -68,15 +65,10 @@
                             {% else %} bg-gray-50 text-gray-300 border-gray-100 {% endif %}">
                             
                             <span class="font-bold text-sm">{{ day }}</span>
-                            
-                            {% if is_done %}
-                                <div class="text-xs opacity-75"><i class="fas fa-check"></i></div>
-                            {% endif %}
+                            {% if is_done %}<div class="text-xs opacity-75"><i class="fas fa-check"></i></div>{% endif %}
                             
                             {% if log and log.note %}
-                                <div class="absolute top-1 right-1 w-1.5 h-1.5 bg-white rounded-full shadow-sm animate-pulse
-                                    {% if not is_done %}bg-indigo-400{% endif %}"></div>
-                                
+                                <div class="absolute top-1 right-1 w-1.5 h-1.5 bg-white rounded-full shadow-sm animate-pulse {% if not is_done %}bg-indigo-400{% endif %}"></div>
                                 <div class="absolute bottom-full mb-2 hidden group-hover:block w-40 bg-gray-800 text-white text-xs p-2 rounded shadow-lg z-10 text-center">
                                     "{{ log.note }}"
                                     <div class="text-gray-400 mt-1 border-t border-gray-600 pt-1">
@@ -92,6 +84,16 @@
         </div>
     </div>
 
+    <div class="bg-white p-6 rounded-xl shadow-sm mb-6">
+        <h2 class="text-xl font-bold text-gray-700 mb-4 flex items-center">
+            <i class="fas fa-chart-line mr-2 text-indigo-500"></i>
+            30-Day Trend
+        </h2>
+        <div class="relative h-64 w-full">
+            <canvas id="trendChart"></canvas>
+        </div>
+    </div>
+
     <div class="bg-white p-6 rounded-xl shadow-sm">
         <h2 class="text-xl font-bold mb-4 text-gray-700 flex items-center">
             <i class="fas fa-book-open mr-2 text-indigo-500"></i>
@@ -100,7 +102,6 @@
         
         <div class="space-y-4">
             {% set has_notes = false %}
-            
             {% for day, log in log_map.items()|sort(reverse=True) %}
                 {% if log.note %}
                 {% set has_notes = true %}
@@ -131,5 +132,49 @@
     </div>
 
 </div>
+
+<script>
+    const ctx = document.getElementById('trendChart').getContext('2d');
+    const gradient = ctx.createLinearGradient(0, 0, 0, 400);
+    gradient.addColorStop(0, 'rgba(99, 102, 241, 0.5)'); // Indigo
+    gradient.addColorStop(1, 'rgba(99, 102, 241, 0)');
+
+    new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: {{ chart_labels | tojson }},
+            datasets: [{
+                label: '{{ habit.name }} Progress',
+                data: {{ chart_data | tojson }},
+                borderColor: '#4F46E5', // Indigo 600
+                backgroundColor: gradient,
+                borderWidth: 2,
+                pointBackgroundColor: '#fff',
+                pointBorderColor: '#4F46E5',
+                pointRadius: 4,
+                pointHoverRadius: 6,
+                fill: true,
+                tension: 0.4
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { display: false }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    grid: { borderDash: [2, 4], color: '#f3f4f6' },
+                    title: { display: true, text: '{{ habit.unit if habit.unit else "Value" }}' }
+                },
+                x: {
+                    grid: { display: false }
+                }
+            }
+        }
+    });
+</script>
 
 {% endblock %}

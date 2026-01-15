@@ -1,0 +1,185 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="max-w-6xl mx-auto">
+    
+    <div class="flex flex-col md:flex-row justify-between items-end mb-8 gap-4">
+        <div>
+            <h1 class="text-3xl font-bold text-gray-800">Year in Pixels</h1>
+            <p class="text-gray-500">Your consistency map for {{ current_year }}.</p>
+        </div>
+        
+        <div class="flex items-center gap-4">
+            <div class="hidden md:flex items-center gap-2 text-xs text-gray-400 mr-4">
+                <span>Less</span>
+                <div class="w-3 h-3 bg-gray-100 rounded-sm"></div>
+                <div class="w-3 h-3 bg-green-300 rounded-sm"></div>
+                <div class="w-3 h-3 bg-green-600 rounded-sm"></div>
+                <span>More</span>
+            </div>
+
+            <div class="relative">
+                <select onchange="location = this.value;" class="appearance-none bg-white border border-gray-200 text-gray-700 py-2 pl-4 pr-8 rounded-lg font-bold shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 cursor-pointer">
+                    {% for y in available_years %}
+                    <option value="{{ url_for('main.full_calendar', year=y) }}" {% if y == current_year %}selected{% endif %}>
+                        {{ y }}
+                    </option>
+                    {% endfor %}
+                </select>
+                <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-500">
+                    <i class="fas fa-chevron-down text-xs"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100 mb-8">
+        <div class="flex flex-col md:flex-row justify-between items-center mb-6">
+            <h3 class="font-bold text-gray-700 flex items-center mb-4 md:mb-0">
+                <i class="fas fa-chart-area mr-2 text-indigo-500"></i> Performance Trends
+            </h3>
+            
+            <div class="flex bg-gray-100 p-1 rounded-lg">
+                <button onclick="updateChart('daily')" id="btn-daily" class="px-4 py-1.5 rounded-md text-xs font-bold text-gray-500 hover:bg-white hover:shadow-sm transition">Daily</button>
+                <button onclick="updateChart('monthly')" id="btn-monthly" class="px-4 py-1.5 rounded-md text-xs font-bold bg-white text-indigo-600 shadow-sm transition">Monthly</button>
+                <button onclick="updateChart('yearly')" id="btn-yearly" class="px-4 py-1.5 rounded-md text-xs font-bold text-gray-500 hover:bg-white hover:shadow-sm transition">All Time</button>
+            </div>
+        </div>
+        
+        <div class="h-64">
+            <canvas id="yearChart"></canvas>
+        </div>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {% for month in cal_data %}
+        <div class="bg-white p-5 rounded-xl shadow-sm border border-gray-100 hover:shadow-md transition">
+            <h3 class="font-bold text-gray-700 mb-3 text-center">{{ month.name }}</h3>
+            
+            <div class="grid grid-cols-7 gap-1 text-center">
+                {% for d in ['M', 'T', 'W', 'T', 'F', 'S', 'S'] %}
+                    <div class="text-[10px] font-bold text-gray-300">{{ d }}</div>
+                {% endfor %}
+
+                {% for week in month.weeks %}
+                    {% for day in week %}
+                        {% if day == 0 %}
+                            <div></div> {% else %}
+                            {% set d_str = '%04d-%02d-%02d' % (current_year, month.index, day) %}
+                            {% set count = activity_map.get(d_str, 0) %}
+                            
+                            {% set intensity_class = 'bg-gray-50' %}
+                            {% if count > 0 %}
+                                {% set ratio = count / max_activity %}
+                                {% if ratio < 0.25 %}{% set intensity_class = 'bg-green-200' %}
+                                {% elif ratio < 0.50 %}{% set intensity_class = 'bg-green-300' %}
+                                {% elif ratio < 0.75 %}{% set intensity_class = 'bg-green-400' %}
+                                {% else %}{% set intensity_class = 'bg-green-600 text-white' %}
+                                {% endif %}
+                            {% endif %}
+
+                            <div class="w-full aspect-square rounded-md flex items-center justify-center text-xs cursor-default relative group {{ intensity_class }}">
+                                <span class="{% if count == 0 %}text-gray-300{% endif %}">{{ day }}</span>
+                                
+                                <div class="absolute bottom-full mb-1 hidden group-hover:block bg-gray-900 text-white text-[10px] p-1.5 rounded z-10 whitespace-nowrap shadow-xl">
+                                    {{ count }} habits
+                                </div>
+                            </div>
+                        {% endif %}
+                    {% endfor %}
+                {% endfor %}
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+</div>
+
+<script>
+    // 1. Load Data passed from Flask
+    const chartData = {{ chart_data | tojson }};
+    const ctx = document.getElementById('yearChart').getContext('2d');
+    let myChart;
+
+    // Gradient Setup
+    const gradient = ctx.createLinearGradient(0, 0, 0, 400);
+    gradient.addColorStop(0, 'rgba(79, 70, 229, 0.4)'); // Indigo
+    gradient.addColorStop(1, 'rgba(79, 70, 229, 0.0)');
+
+    function initChart(type) {
+        // Destroy old chart if it exists to allow update
+        if (myChart) myChart.destroy();
+
+        // Get config based on type (daily/monthly/yearly)
+        const config = chartData[type];
+        
+        // Update Button Styling
+        document.querySelectorAll('button[id^="btn-"]').forEach(b => {
+            b.className = "px-4 py-1.5 rounded-md text-xs font-bold text-gray-500 hover:bg-white hover:shadow-sm transition";
+        });
+        const activeBtn = document.getElementById('btn-' + type);
+        activeBtn.className = "px-4 py-1.5 rounded-md text-xs font-bold bg-white text-indigo-600 shadow-sm transition";
+
+        myChart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: config.labels,
+                datasets: [{
+                    label: 'Habits Completed',
+                    data: config.data,
+                    borderColor: '#4F46E5',
+                    backgroundColor: gradient,
+                    borderWidth: 2,
+                    pointBackgroundColor: '#ffffff',
+                    pointBorderColor: '#4F46E5',
+                    pointRadius: type === 'daily' ? 0 : 4, // Hide dots on daily view
+                    pointHoverRadius: 6,
+                    fill: true,
+                    tension: 0.3
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                interaction: {
+                    mode: 'index',
+                    intersect: false,
+                },
+                plugins: {
+                    legend: { display: false },
+                    tooltip: {
+                        backgroundColor: '#1f2937',
+                        padding: 12,
+                        cornerRadius: 8,
+                        displayColors: false,
+                        callbacks: {
+                            title: function(context) {
+                                return context[0].label;
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        grid: { borderDash: [5, 5], color: '#f3f4f6' }
+                    },
+                    x: {
+                        grid: { display: false },
+                        ticks: {
+                            maxTicksLimit: type === 'daily' ? 12 : 20 // Limit labels on X-axis
+                        }
+                    }
+                }
+            }
+        });
+    }
+
+    // Initialize Default View
+    initChart('monthly');
+
+    // Expose function to buttons
+    window.updateChart = initChart;
+</script>
+
+{% endblock %}

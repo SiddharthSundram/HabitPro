@@ -1,14 +1,98 @@
 {% extends "base.html" %}
 {% block content %}
 
-<div class="flex justify-between items-end mb-8">
+<div class="flex flex-col md:flex-row justify-between items-end mb-6 gap-4">
     <div>
-        <h1 class="text-3xl font-bold text-gray-800">Today's Focus</h1>
-        <p class="text-gray-500">{{ today.strftime('%A, %B %d') }}</p>
+        <h1 class="text-3xl font-bold text-gray-800">
+            {% if view_date == today %}Today's Focus{% else %}{{ view_date.strftime('%A, %B %d') }}{% endif %}
+        </h1>
+        <p class="text-gray-500 mt-1">
+            {% if view_date == today %}
+                <span class="bg-indigo-100 text-indigo-700 px-2 py-0.5 rounded text-xs font-bold uppercase tracking-wide">
+                    Active Day
+                </span> 
+                Build consistency, one day at a time.
+            {% else %}
+                <span class="bg-gray-100 text-gray-600 px-2 py-0.5 rounded text-xs font-bold uppercase tracking-wide">
+                    History Mode
+                </span>
+                Viewing past performance.
+            {% endif %}
+        </p>
+    </div>
+    
+    <div class="flex items-center gap-4">
+        <div class="flex bg-white rounded-lg shadow-sm border p-1 items-center">
+             <a href="{{ url_for('main.dashboard', date=view_date - timedelta(days=1)) }}" 
+                class="px-3 py-2 text-gray-500 hover:text-indigo-600 hover:bg-indigo-50 rounded-md transition">
+                 <i class="fas fa-chevron-left"></i>
+             </a>
+             
+             <div class="px-4 font-bold text-gray-700 min-w-[100px] text-center select-none text-sm">
+                 {% if view_date == today %}Today{% else %}{{ view_date.strftime('%b %d') }}{% endif %}
+             </div>
+             
+             {% if view_date < today %}
+             <a href="{{ url_for('main.dashboard', date=view_date + timedelta(days=1)) }}" 
+                class="px-3 py-2 text-gray-500 hover:text-indigo-600 hover:bg-indigo-50 rounded-md transition">
+                 <i class="fas fa-chevron-right"></i>
+             </a>
+             {% else %}
+             <span class="px-3 py-2 text-gray-200 cursor-not-allowed"><i class="fas fa-chevron-right"></i></span>
+             {% endif %}
+        </div>
+
+        <a href="{{ url_for('main.create_habit') }}" class="md:hidden bg-indigo-600 text-white w-10 h-10 rounded-lg flex items-center justify-center shadow-md hover:bg-indigo-700">
+            <i class="fas fa-plus"></i>
+        </a>
     </div>
 </div>
 
-<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+    
+    <div class="lg:col-span-2 bg-gray-50 p-3 rounded-xl border border-gray-100 flex flex-col md:flex-row gap-4 justify-between items-center">
+        <div class="relative w-full md:w-64 group">
+            <i class="fas fa-search absolute left-3 top-3 text-gray-400 group-focus-within:text-indigo-500 transition"></i>
+            <input type="text" id="searchInput" placeholder="Search habits..." 
+                   class="w-full pl-10 pr-4 py-2 rounded-lg border border-gray-200 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 outline-none transition text-sm bg-white shadow-sm">
+        </div>
+
+        <div class="flex gap-2 overflow-x-auto w-full md:w-auto pb-2 md:pb-0 hide-scrollbar" id="categoryFilters">
+            <button class="filter-btn active px-3 py-1.5 rounded-lg text-[10px] font-bold uppercase tracking-wider bg-indigo-600 text-white shadow-md transition" data-filter="all">All</button>
+            <button class="filter-btn px-3 py-1.5 rounded-lg text-[10px] font-bold uppercase tracking-wider bg-white text-gray-500 border border-gray-200 hover:bg-gray-100 transition" data-filter="Health">Health</button>
+            <button class="filter-btn px-3 py-1.5 rounded-lg text-[10px] font-bold uppercase tracking-wider bg-white text-gray-500 border border-gray-200 hover:bg-gray-100 transition" data-filter="Study">Study</button>
+            <button class="filter-btn px-3 py-1.5 rounded-lg text-[10px] font-bold uppercase tracking-wider bg-white text-gray-500 border border-gray-200 hover:bg-gray-100 transition" data-filter="Work">Work</button>
+            <button class="filter-btn px-3 py-1.5 rounded-lg text-[10px] font-bold uppercase tracking-wider bg-white text-gray-500 border border-gray-200 hover:bg-gray-100 transition" data-filter="Mindfulness">Mind</button>
+        </div>
+    </div>
+
+   <div class="lg:col-span-1 bg-gradient-to-r from-indigo-50 to-purple-50 border-l-4 border-indigo-400 rounded-r-xl p-4 flex flex-col justify-between shadow-sm">
+        <div class="mb-3">
+            <p class="text-indigo-900 italic text-sm font-medium leading-relaxed">"{{ quote.text }}"</p>
+            <p class="text-indigo-500 text-[10px] font-bold mt-1 uppercase tracking-wide">— {{ quote.author }}</p>
+        </div>
+        <div class="text-right">
+            <a href="{{ url_for('main.report') }}" class="text-xs font-bold text-indigo-600 hover:text-indigo-800 flex items-center justify-end">
+                View Weekly Report <i class="fas fa-arrow-right ml-1"></i>
+            </a>
+        </div>
+    </div>
+</div>
+
+<div class="w-full bg-gray-200 rounded-full h-4 mb-8 shadow-inner overflow-hidden relative border border-gray-300">
+    <div class="bg-gradient-to-r from-indigo-500 to-purple-500 h-4 rounded-full transition-all duration-1000 ease-out flex items-center justify-end pr-2 text-[10px] text-white font-bold" 
+         style="width: {{ daily_progress }}%">
+         {% if daily_progress > 5 %}{{ daily_progress }}%{% endif %}
+    </div>
+    
+</div>
+<div class="text-right mb-4">
+    <a href="{{ url_for('main.full_calendar') }}" class="text-xs font-bold text-indigo-500 hover:text-indigo-700">
+        View Full Year Map <i class="fas fa-arrow-right"></i>
+    </a>
+</div>
+
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" id="habitsGrid">
     {% for habit in habits %}
     
     {% set log = log_map.get(habit.id) %}
@@ -18,41 +102,62 @@
     {% set color_class = 'border-indigo-500' %}
     {% if habit.category == 'Health' %}{% set color_class = 'border-green-500' %}{% endif %}
     {% if habit.category == 'Study' %}{% set color_class = 'border-yellow-500' %}{% endif %}
+    {% if habit.category == 'Mindfulness' %}{% set color_class = 'border-purple-500' %}{% endif %}
 
-    <div class="bg-white rounded-xl shadow-sm hover:shadow-md transition p-6 border-t-4 {{ color_class }} relative overflow-hidden group">
+    <div class="habit-card bg-white rounded-xl shadow-sm hover:shadow-md transition p-6 border-t-4 {{ color_class }} relative overflow-hidden group">
         
         <div class="flex justify-between items-start mb-4">
             <div>
-                <span class="text-xs font-bold uppercase text-gray-400 tracking-wider">{{ habit.category }}</span>
-                <h3 class="text-xl font-bold text-gray-800">{{ habit.name }}</h3>
-                <div class="text-xs text-gray-400 mt-1">
-                    🔥 Streak: <span class="text-orange-500 font-bold">{{ habit.current_streak }}</span>
+                <span class="category-badge text-[10px] font-bold uppercase text-gray-400 tracking-wider bg-gray-50 px-2 py-1 rounded">{{ habit.category }}</span>
+                <h3 class="habit-name text-xl font-bold text-gray-800 mt-2">{{ habit.name }}</h3>
+                <div class="text-xs text-gray-400 mt-1 flex items-center">
+                    <i class="fas fa-fire text-orange-500 mr-1"></i> Streak: <span class="font-bold text-gray-600 ml-1">{{ habit.current_streak }}</span>
                 </div>
             </div>
             
             {% if is_done %}
-            <div class="bg-green-100 text-green-600 p-2 rounded-full">
+            <div class="bg-green-100 text-green-600 w-8 h-8 flex items-center justify-center rounded-full animate-bounce">
                 <i class="fas fa-check"></i>
             </div>
             {% endif %}
         </div>
 
-        <div class="mt-4">
+        <div class="mb-4 flex items-center justify-between bg-gray-50 rounded-lg p-2 border border-gray-100">
+            <span class="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Last 5 Days</span>
+            <div class="flex gap-1.5">
+                {% for d in past_dates %}
+                    {% set status = history_map[habit.id].get(d) %}
+                    <div class="w-2.5 h-2.5 rounded-full transition-all duration-300
+                        {% if d == view_date %} ring-2 ring-indigo-300 ring-offset-1 scale-110 {% endif %}
+                        {% if status == 'done' %} bg-green-500
+                        {% elif status == 'partial' %} bg-yellow-400
+                        {% elif status == 'missed' %} bg-red-200
+                        {% else %} bg-gray-200 {% endif %}"
+                        title="{{ d.strftime('%b %d') }}">
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <div class="mt-2">
             <form action="{{ url_for('main.log_habit', habit_id=habit.id) }}" method="POST">
                 
-                <div class="mb-3">
-                    <input type="text" name="note" placeholder="Add a note (optional)..." 
-                           class="w-full text-xs p-2 border-b border-gray-200 focus:border-indigo-500 outline-none bg-transparent placeholder-gray-400"
+                <input type="hidden" name="date_str" value="{{ view_date }}">
+                
+                <div class="mb-3 relative">
+                    <i class="fas fa-pen absolute left-0 top-2.5 text-gray-300 text-xs"></i>
+                    <input type="text" name="note" placeholder="Add a note..." 
+                           class="w-full text-xs py-2 pl-5 border-b border-gray-100 focus:border-indigo-500 outline-none bg-transparent placeholder-gray-400 transition"
                            value="{{ log.note if log and log.note else '' }}">
                 </div>
 
                 {% if habit.habit_type == 'numeric' %}
-                    <div class="flex justify-between text-xs text-gray-400 mb-1">
+                    <div class="flex justify-between text-[10px] font-bold text-gray-400 mb-1 uppercase">
                         <span>Progress</span>
                         <span>{{ current_val }} / {{ habit.target_value }} {{ habit.unit }}</span>
                     </div>
-                    <div class="w-full bg-gray-100 rounded-full h-2 mb-3">
-                        <div class="bg-indigo-600 h-2 rounded-full transition-all duration-500" style="width: {{ (current_val / habit.target_value * 100)|int }}%"></div>
+                    <div class="w-full bg-gray-100 rounded-full h-2 mb-4 overflow-hidden">
+                        <div class="bg-indigo-600 h-2 rounded-full transition-all duration-500 ease-out" style="width: {{ (current_val / habit.target_value * 100)|int }}%"></div>
                     </div>
                 {% endif %}
 
@@ -60,41 +165,249 @@
                     
                     {% if habit.habit_type == 'boolean' %}
                         <input type="hidden" name="value" value="1">
-                        <button type="submit" class="flex-grow py-2 rounded-lg font-bold transition text-sm
-                            {% if is_done %} bg-green-50 text-green-600 hover:bg-green-100
-                            {% else %} bg-gray-100 text-gray-600 hover:bg-indigo-600 hover:text-white {% endif %}">
-                            {% if is_done %}
-                                <i class="fas fa-check mr-1"></i> Completed
-                            {% else %}
-                                Mark Complete
-                            {% endif %}
+                        <button type="button" onclick="celebrateAndSubmit(this)" class="flex-grow py-2.5 rounded-lg font-bold transition text-sm shadow-sm
+                            {% if is_done %} bg-green-50 text-green-600 hover:bg-green-100 border border-green-200
+                            {% else %} bg-gray-800 text-white hover:bg-indigo-600 {% endif %}">
+                            {% if is_done %} <i class="fas fa-check mr-1"></i> Done {% else %} Mark Complete {% endif %}
                         </button>
-
                     {% else %}
-                        <input type="number" name="value" value="{{ current_val }}" class="w-16 p-2 border rounded text-center text-sm font-bold text-gray-700">
-                        <button type="submit" class="flex-grow bg-gray-800 text-white text-sm font-bold rounded hover:bg-black transition">
+                        <input type="number" name="value" value="{{ current_val }}" class="w-16 p-2.5 border rounded-lg text-center text-sm font-bold text-gray-700 focus:ring-2 focus:ring-indigo-500 outline-none">
+                        <button type="submit" class="flex-grow bg-gray-800 text-white text-sm font-bold rounded-lg hover:bg-black transition shadow-sm">
                             Update
                         </button>
                     {% endif %}
 
+                    <button type="button" onclick="openTimer('{{ habit.name }}', {{ habit.id }})" 
+                            class="px-3 py-2 bg-indigo-50 text-indigo-600 rounded-lg hover:bg-indigo-600 hover:text-white transition flex items-center justify-center border border-indigo-100 shadow-sm"
+                            title="Start Focus Session">
+                        <i class="fas fa-hourglass-start"></i>
+                    </button>
+
                     <a href="{{ url_for('main.habit_detail', habit_id=habit.id) }}" 
-                       class="px-3 py-2 bg-indigo-50 text-indigo-600 rounded-lg hover:bg-indigo-100 transition flex items-center justify-center" 
-                       title="View History & Analytics">
+                       class="px-3 py-2 bg-gray-50 text-gray-400 rounded-lg hover:bg-gray-100 transition flex items-center justify-center border border-gray-100" 
+                       title="View Analytics">
                         <i class="fas fa-chart-bar"></i>
                     </a>
-
                 </div>
             </form>
         </div>
     </div>
-    {% else %}
-    <div class="col-span-full text-center py-12">
-        <div class="text-gray-300 text-6xl mb-4"><i class="fas fa-seedling"></i></div>
-        <h3 class="text-xl font-bold text-gray-600">No habits yet.</h3>
-        <p class="text-gray-500 mb-6">Start small. Build consistency.</p>
-        <a href="{{ url_for('main.create_habit') }}" class="bg-indigo-600 text-white px-6 py-3 rounded-lg font-bold">Create First Habit</a>
+   {% else %}
+    <div class="col-span-full">
+        <div class="text-center py-12 bg-white rounded-2xl border-2 border-dashed border-gray-200 mb-8">
+            <div class="text-indigo-200 text-6xl mb-4"><i class="fas fa-rocket"></i></div>
+            <h3 class="text-2xl font-bold text-gray-700 mb-2">Let's get started!</h3>
+            <p class="text-gray-500 mb-8">Choose a template below or create your own.</p>
+            
+            <a href="{{ url_for('main.create_habit') }}" class="bg-gray-900 text-white px-6 py-3 rounded-xl font-bold hover:bg-black transition shadow-lg inline-block">
+                Build Custom Habit
+            </a>
+        </div>
+
+        <h4 class="text-gray-400 font-bold uppercase text-xs tracking-widest mb-4 ml-1">Popular Templates</h4>
+        <div class="grid grid-cols-2 md:grid-cols-5 gap-4">
+            <a href="{{ url_for('main.add_template', template_id='water') }}" class="bg-blue-50 hover:bg-blue-100 p-4 rounded-xl text-center border border-blue-100 transition group">
+                <div class="text-2xl mb-2 group-hover:scale-110 transition">💧</div>
+                <div class="font-bold text-blue-800 text-sm">Drink Water</div>
+            </a>
+            <a href="{{ url_for('main.add_template', template_id='read') }}" class="bg-yellow-50 hover:bg-yellow-100 p-4 rounded-xl text-center border border-yellow-100 transition group">
+                <div class="text-2xl mb-2 group-hover:scale-110 transition">📚</div>
+                <div class="font-bold text-yellow-800 text-sm">Read 10 Pages</div>
+            </a>
+            <a href="{{ url_for('main.add_template', template_id='meditate') }}" class="bg-purple-50 hover:bg-purple-100 p-4 rounded-xl text-center border border-purple-100 transition group">
+                <div class="text-2xl mb-2 group-hover:scale-110 transition">🧘</div>
+                <div class="font-bold text-purple-800 text-sm">Meditate</div>
+            </a>
+            <a href="{{ url_for('main.add_template', template_id='walk') }}" class="bg-green-50 hover:bg-green-100 p-4 rounded-xl text-center border border-green-100 transition group">
+                <div class="text-2xl mb-2 group-hover:scale-110 transition">鞋</div>
+                <div class="font-bold text-green-800 text-sm">Morning Walk</div>
+            </a>
+            <a href="{{ url_for('main.add_template', template_id='code') }}" class="bg-gray-50 hover:bg-gray-100 p-4 rounded-xl text-center border border-gray-200 transition group">
+                <div class="text-2xl mb-2 group-hover:scale-110 transition">💻</div>
+                <div class="font-bold text-gray-800 text-sm">Code Daily</div>
+            </a>
+        </div>
     </div>
     {% endfor %}
 </div>
+
+<div id="timerModal" class="fixed inset-0 bg-gray-900 bg-opacity-95 z-50 hidden flex flex-col items-center justify-center text-white backdrop-blur-sm transition-opacity duration-300">
+    <button onclick="closeTimer()" class="absolute top-6 right-6 text-gray-400 hover:text-white text-3xl transition">
+        <i class="fas fa-times"></i>
+    </button>
+
+    <h2 id="timerHabitName" class="text-3xl font-bold mb-2 tracking-wide">Reading</h2>
+    <p class="text-indigo-300 uppercase tracking-widest text-sm font-bold mb-10">Deep Focus Mode</p>
+
+    <div class="relative w-72 h-72 flex items-center justify-center mb-10">
+        <svg class="w-full h-full transform -rotate-90">
+            <circle cx="144" cy="144" r="130" stroke="currentColor" stroke-width="8" fill="transparent" class="text-gray-800" />
+            <circle id="progressRing" cx="144" cy="144" r="130" stroke="currentColor" stroke-width="8" fill="transparent" 
+                    class="text-indigo-500 transition-all duration-1000 ease-linear" 
+                    stroke-dasharray="817" stroke-dashoffset="0" stroke-linecap="round" />
+        </svg>
+        <div class="absolute text-6xl font-mono font-bold" id="timerDisplay">25:00</div>
+    </div>
+
+    <div class="flex gap-6">
+        <button id="toggleTimerBtn" onclick="toggleTimer()" class="bg-indigo-600 hover:bg-indigo-500 text-white w-20 h-20 rounded-full flex items-center justify-center text-3xl shadow-lg transition transform hover:scale-110">
+            <i class="fas fa-play pl-1"></i>
+        </button>
+        <button onclick="resetTimer()" class="bg-gray-700 hover:bg-gray-600 text-white w-20 h-20 rounded-full flex items-center justify-center text-2xl shadow-lg transition transform hover:scale-110">
+            <i class="fas fa-redo"></i>
+        </button>
+    </div>
+
+    <form id="timerForm" method="POST" action="" class="hidden">
+        <input type="hidden" name="date_str" value="{{ view_date }}">
+        <input type="hidden" name="value" value="1">
+        <input type="hidden" name="note" value="Completed via Focus Timer ⏱️">
+    </form>
+</div>
+
+<script>
+    // FILTER LOGIC
+    document.addEventListener('DOMContentLoaded', () => {
+        const searchInput = document.getElementById('searchInput');
+        const filterBtns = document.querySelectorAll('.filter-btn');
+        const cards = document.querySelectorAll('.habit-card');
+
+        searchInput.addEventListener('input', (e) => filterHabits(e.target.value.toLowerCase(), getActiveCategory()));
+
+        filterBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                filterBtns.forEach(b => {
+                    b.classList.remove('bg-indigo-600', 'text-white', 'shadow-md');
+                    b.classList.add('bg-white', 'text-gray-500', 'border');
+                });
+                btn.classList.remove('bg-white', 'text-gray-500', 'border');
+                btn.classList.add('bg-indigo-600', 'text-white', 'shadow-md');
+                filterHabits(searchInput.value.toLowerCase(), btn.dataset.filter);
+            });
+        });
+
+        function getActiveCategory() { return document.querySelector('.filter-btn.bg-indigo-600').dataset.filter; }
+
+        function filterHabits(searchTerm, category) {
+            cards.forEach(card => {
+                const name = card.querySelector('.habit-name').innerText.toLowerCase();
+                const cat = card.querySelector('.category-badge').innerText;
+                const matchesSearch = name.includes(searchTerm);
+                const matchesCategory = category === 'all' || cat === category;
+                if (matchesSearch && matchesCategory) card.classList.remove('hidden');
+                else card.classList.add('hidden');
+            });
+        }
+    });
+
+    // TIMER LOGIC
+    let timerInterval, timeLeft = 25 * 60, totalTime = 25 * 60, isRunning = false, currentHabitId = null;
+    const modal = document.getElementById('timerModal');
+    const display = document.getElementById('timerDisplay');
+    const ring = document.getElementById('progressRing');
+    const toggleBtn = document.getElementById('toggleTimerBtn');
+    const nameLabel = document.getElementById('timerHabitName');
+    const form = document.getElementById('timerForm');
+    const CIRCUMFERENCE = 817; 
+
+    function openTimer(habitName, habitId) {
+        currentHabitId = habitId;
+        nameLabel.innerText = habitName;
+        modal.classList.remove('hidden');
+        resetTimer();
+    }
+
+    function closeTimer() {
+        modal.classList.add('hidden');
+        clearInterval(timerInterval);
+        isRunning = false;
+    }
+
+    function toggleTimer() {
+        if (isRunning) {
+            clearInterval(timerInterval);
+            toggleBtn.innerHTML = '<i class="fas fa-play pl-1"></i>';
+            isRunning = false;
+        } else {
+            timerInterval = setInterval(updateTimer, 1000);
+            toggleBtn.innerHTML = '<i class="fas fa-pause"></i>';
+            toggleBtn.classList.remove('bg-indigo-600');
+            toggleBtn.classList.add('bg-orange-500');
+            isRunning = true;
+        }
+    }
+
+    function updateTimer() {
+        if (timeLeft > 0) {
+            timeLeft--;
+            updateDisplay();
+            updateRing();
+        } else {
+            finishSession();
+        }
+    }
+
+    function updateDisplay() {
+        const m = Math.floor(timeLeft / 60);
+        const s = timeLeft % 60;
+        display.innerText = `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+    }
+
+    function updateRing() {
+        const offset = CIRCUMFERENCE - (timeLeft / totalTime) * CIRCUMFERENCE;
+        ring.style.strokeDashoffset = offset;
+    }
+
+    function resetTimer() {
+        clearInterval(timerInterval);
+        isRunning = false;
+        timeLeft = 25 * 60;
+        updateDisplay();
+        ring.style.strokeDashoffset = 0;
+        toggleBtn.innerHTML = '<i class="fas fa-play pl-1"></i>';
+        toggleBtn.classList.add('bg-indigo-600');
+        toggleBtn.classList.remove('bg-orange-500');
+    }
+
+    function finishSession() {
+        clearInterval(timerInterval);
+        
+        // 1. Play Sound
+        const audio = new Audio('https://actions.google.com/sounds/v1/alarms/beep_short.ogg');
+        audio.play();
+
+        // 2. Trigger Confetti
+        confetti({
+            particleCount: 100,
+            spread: 70,
+            origin: { y: 0.6 }
+        });
+
+        // 3. Submit Form (Delayed slightly so user sees confetti)
+        setTimeout(() => {
+            form.action = `/log_habit/${currentHabitId}`;
+            form.submit();
+        }, 1000);
+    }
+
+    function celebrateAndSubmit(btn) {
+        // Trigger Confetti from the button's position
+        const rect = btn.getBoundingClientRect();
+        const x = (rect.left + rect.right) / 2 / window.innerWidth;
+        const y = (rect.top + rect.bottom) / 2 / window.innerHeight;
+
+        confetti({
+            particleCount: 60,
+            spread: 50,
+            origin: { x: x, y: y } // Burst from the button!
+        });
+
+        // Find the parent form and submit it after a delay
+        const form = btn.closest('form');
+        setTimeout(() => {
+            form.submit();
+        }, 800);
+    }
+</script>
 
 {% endblock %}

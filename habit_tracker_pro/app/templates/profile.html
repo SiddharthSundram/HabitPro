@@ -1,0 +1,160 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="max-w-4xl mx-auto">
+    
+    <div class="bg-white rounded-xl shadow-md overflow-hidden mb-6 relative">
+        <div class="h-32 bg-gradient-to-r from-indigo-500 to-purple-600"></div>
+        <div class="px-8 pb-8 flex items-end -mt-12 relative">
+            <div class="bg-white p-2 rounded-xl shadow-lg">
+                <img src="{{ user.avatar(128) }}" class="w-24 h-24 rounded-lg shadow-sm border-4 border-white bg-gray-200">
+            </div>
+            <div class="ml-6 mb-2">
+                <h1 class="text-3xl font-bold text-gray-800">{{ user.username }}</h1>
+                <div class="text-gray-500 font-medium">Level {{ level }} Achiever</div>
+            </div>
+            <div class="ml-auto mb-4 text-right hidden md:block">
+                <div class="text-xs text-indigo-200 uppercase font-bold bg-indigo-600 px-3 py-1 rounded-full">
+                    {{ xp }} Total Actions
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        
+        <div class="md:col-span-1">
+            <div class="bg-white p-6 rounded-xl shadow-sm">
+                <h2 class="text-xl font-bold text-gray-700 mb-4 flex items-center">
+                    <i class="fas fa-shield-alt mr-2 text-indigo-500"></i> Stats
+                </h2>
+                
+                <div class="space-y-4">
+                    {% for key, val in stats.items() %}
+                    {% set color = 'bg-gray-500' %}
+                    {% if key == 'STR' %}{% set color = 'bg-red-500' %}{% endif %}
+                    {% if key == 'INT' %}{% set color = 'bg-blue-500' %}{% endif %}
+                    {% if key == 'FOC' %}{% set color = 'bg-yellow-500' %}{% endif %}
+                    {% if key == 'WIS' %}{% set color = 'bg-green-500' %}{% endif %}
+                    <div>
+                        <div class="flex justify-between text-xs font-bold mb-1">
+                            <span>{{ key }}</span>
+                            <span>{{ val }}</span>
+                        </div>
+                        <div class="w-full bg-gray-100 rounded-full h-2">
+                            <div class="{{ color }} h-2 rounded-full" style="width: {{ (val % 10) * 10 }}%"></div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+
+                <div class="mt-6 p-4 bg-gray-50 rounded-lg text-xs text-gray-500 text-center">
+                    Complete habits to level up your stats.<br>Every 10 points = 1 Stat Level.
+                </div>
+            </div>
+        </div>
+
+        <div class="md:col-span-2 space-y-6">
+            
+            <div class="bg-gradient-to-r from-blue-500 to-indigo-600 p-6 rounded-xl shadow-lg text-white relative overflow-hidden">
+                <div class="relative z-10">
+                    <h3 class="font-bold text-lg mb-1">Show off your progress!</h3>
+                    <p class="text-blue-100 text-sm mb-4">You have reached Level {{ level }}. Inspire others.</p>
+                    
+                    <div class="flex gap-3">
+                        <a href="https://twitter.com/intent/tweet?text=I%20just%20hit%20Level%20{{ level }}%20on%20HabitPro!%20%F0%9F%9A%80%20Tracking%20{{ xp }}%20activities%20so%20far.%20%23BuildInPublic%20%23HabitPro" 
+                           target="_blank" 
+                           class="bg-white text-blue-600 px-4 py-2 rounded-lg font-bold text-xs hover:bg-blue-50 transition flex items-center">
+                            <i class="fab fa-twitter mr-2"></i> Tweet
+                        </a>
+                        <a href="https://www.linkedin.com/sharing/share-offsite/?url=https://habitpro.onrender.com" 
+                           target="_blank" 
+                           class="bg-blue-800 text-white px-4 py-2 rounded-lg font-bold text-xs hover:bg-blue-900 transition flex items-center">
+                            <i class="fab fa-linkedin mr-2"></i> Post
+                        </a>
+                    </div>
+                </div>
+                <i class="fas fa-bullhorn absolute -bottom-4 -right-4 text-8xl text-white opacity-20 transform rotate-12"></i>
+            </div>
+
+            <div class="bg-white p-6 rounded-xl shadow-sm">
+                <h2 class="text-xl font-bold text-gray-700 mb-6 flex items-center">
+                    <i class="fas fa-trophy mr-2 text-yellow-500"></i> Trophy Case
+                </h2>
+                
+                <div class="grid grid-cols-2 md:grid-cols-3 gap-4">
+                    {% for unlock in user.unlocks %}
+                    <div class="border border-indigo-100 bg-indigo-50 p-4 rounded-xl text-center transform transition hover:scale-105">
+                        <div class="text-3xl mb-2 {{ unlock.achievement.color }}">
+                            <i class="{{ unlock.achievement.icon }}"></i>
+                        </div>
+                        <h3 class="font-bold text-gray-800 text-sm">{{ unlock.achievement.name }}</h3>
+                        <div class="text-[10px] text-gray-400 mt-2 uppercase">
+                            {{ unlock.unlocked_at.strftime('%b %d') }}
+                        </div>
+                    </div>
+                    {% else %}
+                    <div class="col-span-full text-center py-6 text-gray-400 bg-gray-50 rounded-lg border-2 border-dashed">
+                        <i class="fas fa-lock text-3xl mb-2 opacity-50"></i>
+                        <p class="text-sm">No achievements yet. Keep logging!</p>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <div class="bg-white p-6 rounded-xl shadow-sm">
+                <div class="flex justify-between items-center mb-6">
+                    <h2 class="text-xl font-bold text-gray-700">Account</h2>
+                    <a href="{{ url_for('main.settings') }}" class="text-gray-400 hover:text-indigo-600 transition" title="Edit Settings">
+                        <i class="fas fa-cog text-xl"></i>
+                    </a>
+                </div>
+                
+                <div class="border-b pb-4 mb-4">
+                    <label class="block text-xs font-bold text-gray-400 uppercase">Email</label>
+                    <div class="text-lg text-gray-800">{{ user.email }}</div>
+                </div>
+
+                <div class="border-b pb-4 mb-4">
+                    <h3 class="text-xs font-bold text-gray-400 uppercase mb-2">Data & Privacy</h3>
+                    <a href="{{ url_for('main.export_data') }}" class="flex items-center text-indigo-600 hover:text-indigo-800 font-medium text-sm">
+                        <i class="fas fa-download mr-2"></i> Download My Data (CSV)
+                    </a>
+                </div>
+
+                <div id="installContainer" class="hidden border-b pb-4 mb-4">
+                    <button id="installBtn" class="w-full flex items-center justify-center bg-indigo-600 text-white px-4 py-3 rounded-lg font-bold hover:bg-indigo-700 transition shadow-lg">
+                        <i class="fas fa-download mr-2"></i> Install App
+                    </button>
+                    <p class="text-xs text-gray-400 mt-2 text-center">Add to Home Screen for quick access.</p>
+                </div>
+                
+                <div class="mt-4">
+                    <a href="{{ url_for('main.logout') }}" class="text-red-500 font-bold hover:underline">Log Out</a>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<script>
+    let deferredPrompt;
+    const installContainer = document.getElementById('installContainer');
+    const installBtn = document.getElementById('installBtn');
+
+    window.addEventListener('beforeinstallprompt', (e) => {
+        e.preventDefault();
+        deferredPrompt = e;
+        installContainer.classList.remove('hidden');
+    });
+
+    installBtn.addEventListener('click', (e) => {
+        installContainer.classList.add('hidden');
+        deferredPrompt.prompt();
+        deferredPrompt.userChoice.then((choiceResult) => {
+            deferredPrompt = null;
+        });
+    });
+</script>
+{% endblock %}
