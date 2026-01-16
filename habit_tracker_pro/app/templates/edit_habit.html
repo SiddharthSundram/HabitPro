@@ -1,25 +1,25 @@
 {% extends "base.html" %}
 {% block content %}
-<div class="max-w-xl mx-auto bg-white p-8 rounded-xl shadow-md border-t-4 border-indigo-500">
+<div class="max-w-xl mx-auto bg-white dark:bg-dark-card p-8 rounded-3xl shadow-sm border-t-4 border-indigo-500 dark:border-indigo-400 transition-colors duration-300 animate-fade-in">
     
-    <div class="flex justify-between items-center mb-6">
-        <h2 class="text-2xl font-bold text-gray-800">Edit Habit</h2>
+    <div class="flex justify-between items-center mb-8">
+        <h2 class="text-3xl font-extrabold text-gray-800 dark:text-white">Edit Habit</h2>
         <a href="{{ url_for('main.delete_habit', habit_id=habit.id) }}" 
-           class="text-red-500 text-sm hover:underline"
+           class="text-red-500 text-sm font-bold hover:text-red-600 dark:hover:text-red-400 flex items-center transition"
            onclick="return confirm('Are you sure? This will delete all history for this habit.')">
-           Delete Habit
+           <i class="fas fa-trash-alt mr-2"></i> Delete
         </a>
     </div>
     
     <form method="POST">
-        <div class="mb-4">
-            <label class="block text-gray-700 text-sm font-bold mb-2">Habit Name</label>
-            <input type="text" name="name" value="{{ habit.name }}" class="w-full p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500" required>
+        <div class="mb-6">
+            <label class="block text-gray-700 dark:text-gray-300 text-xs font-bold uppercase tracking-wider mb-2">Habit Name</label>
+            <input type="text" name="name" value="{{ habit.name }}" class="w-full p-4 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:text-white font-medium transition" required>
         </div>
         
-        <div class="mb-4">
-            <label class="block text-gray-700 text-sm font-bold mb-2">Category</label>
-            <select name="category" class="w-full p-3 border rounded-lg bg-white">
+        <div class="mb-6">
+            <label class="block text-gray-700 dark:text-gray-300 text-xs font-bold uppercase tracking-wider mb-2">Category</label>
+            <select name="category" class="w-full p-4 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:text-white font-medium transition appearance-none">
                 <option value="Health" {% if habit.category == 'Health' %}selected{% endif %}>Health & Fitness</option>
                 <option value="Study" {% if habit.category == 'Study' %}selected{% endif %}>Study & Learning</option>
                 <option value="Work" {% if habit.category == 'Work' %}selected{% endif %}>Deep Work</option>
@@ -28,27 +28,27 @@
         </div>
 
         {% if habit.habit_type == 'numeric' %}
-        <div class="mb-6 p-4 bg-gray-50 rounded-lg border">
-            <h3 class="font-bold text-gray-700 mb-2">Tracking Targets</h3>
-            <div class="grid grid-cols-2 gap-4">
+        <div class="mb-8 p-6 bg-indigo-50 dark:bg-indigo-900/20 rounded-2xl border border-indigo-100 dark:border-indigo-500/20">
+            <h3 class="font-bold text-indigo-900 dark:text-indigo-300 mb-4 flex items-center"><i class="fas fa-sliders-h mr-2"></i> Tracking Targets</h3>
+            <div class="grid grid-cols-2 gap-6">
                 <div>
-                    <label class="text-xs font-bold text-gray-500">Target Value</label>
-                    <input type="number" name="target_value" value="{{ habit.target_value }}" class="w-full p-2 border rounded">
+                    <label class="text-xs font-bold text-indigo-400 uppercase mb-1 block">Target</label>
+                    <input type="number" name="target_value" value="{{ habit.target_value }}" class="w-full p-3 border border-indigo-200 dark:border-indigo-500/30 rounded-xl bg-white dark:bg-gray-800 dark:text-white font-bold">
                 </div>
                 <div>
-                    <label class="text-xs font-bold text-gray-500">Unit</label>
-                    <input type="text" name="unit" value="{{ habit.unit }}" class="w-full p-2 border rounded">
+                    <label class="text-xs font-bold text-indigo-400 uppercase mb-1 block">Unit</label>
+                    <input type="text" name="unit" value="{{ habit.unit }}" class="w-full p-3 border border-indigo-200 dark:border-indigo-500/30 rounded-xl bg-white dark:bg-gray-800 dark:text-white font-bold">
                 </div>
             </div>
-            <p class="text-xs text-gray-400 mt-2">Changing targets will not affect past history.</p>
+            <p class="text-xs text-indigo-400 mt-3 font-medium"><i class="fas fa-info-circle mr-1"></i> Past history remains unchanged.</p>
         </div>
         {% endif %}
 
         <div class="flex gap-4">
-            <button type="submit" class="flex-1 bg-indigo-600 text-white font-bold py-3 rounded-lg hover:bg-indigo-700 transition">
+            <button type="submit" class="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-4 rounded-xl transition shadow-lg shadow-indigo-500/30">
                 Save Changes
             </button>
-            <a href="{{ url_for('main.dashboard') }}" class="flex-1 bg-gray-200 text-gray-700 font-bold py-3 rounded-lg hover:bg-gray-300 text-center">
+            <a href="{{ url_for('main.dashboard') }}" class="flex-1 bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300 font-bold py-4 rounded-xl hover:bg-gray-200 dark:hover:bg-gray-700 text-center transition">
                 Cancel
             </a>
         </div>

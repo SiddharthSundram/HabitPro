@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="max-w-3xl mx-auto animate-fade-in py-10">
+    <div class="text-center mb-12">
+        <h1 class="text-4xl font-extrabold text-gray-900 dark:text-white mb-4">About HabitPro</h1>
+        <p class="text-gray-500 dark:text-gray-400 text-lg">Gamifying personal growth for the modern builder.</p>
+    </div>
+
+    <div class="bg-white dark:bg-dark-card p-8 rounded-3xl shadow-sm border border-gray-100 dark:border-dark-border space-y-8">
+        
+        <section>
+            <h2 class="text-2xl font-bold text-gray-800 dark:text-white mb-3">Our Mission</h2>
+            <p class="text-gray-600 dark:text-gray-300 leading-relaxed">
+                HabitPro was built with a simple philosophy: <strong>Consistency beats intensity.</strong> We believe that building good habits shouldn't feel like a chore. By combining behavioral psychology with RPG-style gamification, we turn your daily tasks into a game you actually want to play.
+            </p>
+        </section>
+
+        <section>
+            <h2 class="text-2xl font-bold text-gray-800 dark:text-white mb-3">Who is this for?</h2>
+            <ul class="space-y-3 text-gray-600 dark:text-gray-300">
+                <li class="flex items-start"><i class="fas fa-check-circle text-indigo-500 mt-1 mr-3"></i> <span><strong>Students</strong> wanting to track study hours and assignments.</span></li>
+                <li class="flex items-start"><i class="fas fa-check-circle text-indigo-500 mt-1 mr-3"></i> <span><strong>Developers</strong> looking to maintain a coding streak.</span></li>
+                <li class="flex items-start"><i class="fas fa-check-circle text-indigo-500 mt-1 mr-3"></i> <span><strong>Fitness Enthusiasts</strong> tracking workouts and water intake.</span></li>
+                <li class="flex items-start"><i class="fas fa-check-circle text-indigo-500 mt-1 mr-3"></i> <span><strong>Anyone</strong> who wants to take control of their day.</span></li>
+            </ul>
+        </section>
+
+        <section>
+            <h2 class="text-2xl font-bold text-gray-800 dark:text-white mb-3">Meet the Creator</h2>
+            <div class="flex items-center gap-4 bg-gray-50 dark:bg-white/5 p-4 rounded-xl">
+                <div class="w-16 h-16 rounded-full bg-indigo-600 flex items-center justify-center text-white text-xl font-bold">SS</div>
+                <div>
+                    <p class="font-bold text-gray-900 dark:text-white text-lg">Siddharth Sundram</p>
+                    <p class="text-sm text-gray-500 dark:text-gray-400">Full Stack Developer & Student</p>
+                    <a href="mailto:sidsundram@gmail.com" class="text-indigo-500 text-sm hover:underline mt-1 block">sidsundram@gmail.com</a>
+                </div>
+            </div>
+        </section>
+
+    </div>
+</div>
+{% endblock %}

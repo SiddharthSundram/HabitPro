@@ -1,49 +1,100 @@
 {% extends "base.html" %}
 {% block content %}
 
-<div class="max-w-2xl mx-auto text-center">
+<div class="max-w-3xl mx-auto text-center animate-fade-in">
     
-    <h1 class="text-3xl font-bold text-gray-800 mb-2">Weekly Insight</h1>
-    <p class="text-gray-500 mb-8">AI Analysis of your last 7 days</p>
+    <h1 class="text-4xl font-extrabold text-gray-800 dark:text-white mb-2 tracking-tight">Weekly Insight</h1>
+    <p class="text-gray-500 dark:text-gray-400 mb-10 text-lg">AI Analysis of your last 7 days</p>
 
-    <div class="bg-white rounded-2xl shadow-xl overflow-hidden mb-8 border border-gray-100 relative">
-        <div class="h-2 bg-gradient-to-r from-indigo-500 to-purple-600"></div>
-        <div class="p-8">
-            <div class="text-sm font-bold text-gray-400 uppercase tracking-widest mb-4">Performance Grade</div>
-            
-            <div class="text-9xl font-black mb-4 
-                {% if grade == 'S' %}text-yellow-400 drop-shadow-lg
-                {% elif grade == 'A' %}text-green-500
-                {% elif grade == 'B' %}text-blue-500
-                {% elif grade == 'C' %}text-orange-500
-                {% else %}text-red-500{% endif %}">
-                {{ grade }}
+    <div class="bg-white dark:bg-dark-card rounded-[2rem] shadow-2xl overflow-hidden mb-10 border border-gray-100 dark:border-dark-border relative transition-colors duration-300">
+        
+        <div class="h-2 bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500"></div>
+        
+        <div class="p-8 md:p-12">
+            <div class="mb-10">
+                <div class="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-[0.2em] mb-4">Performance Grade</div>
+                
+                <div class="text-[10rem] leading-none font-black mb-2 drop-shadow-2xl filter 
+                    {% if grade == 'S' %}text-transparent bg-clip-text bg-gradient-to-br from-yellow-300 to-yellow-600 drop-shadow-[0_10px_10px_rgba(234,179,8,0.5)]
+                    {% elif grade == 'A' %}text-emerald-500 drop-shadow-[0_10px_10px_rgba(16,185,129,0.3)]
+                    {% elif grade == 'B' %}text-blue-500 drop-shadow-[0_10px_10px_rgba(59,130,246,0.3)]
+                    {% elif grade == 'C' %}text-orange-500
+                    {% else %}text-gray-400{% endif %}">
+                    {{ grade }}
+                </div>
+                
+                <div class="inline-flex items-center bg-gray-50 dark:bg-gray-800/50 rounded-full px-5 py-2 text-sm font-bold text-gray-500 dark:text-gray-400 border border-gray-100 dark:border-gray-700/50">
+                    <span class="w-2 h-2 rounded-full bg-indigo-500 mr-2 animate-pulse"></span>
+                    Consistency Score: <span class="text-indigo-600 dark:text-indigo-400 ml-1">{{ score }}%</span>
+                </div>
             </div>
-            
-            <div class="inline-block bg-gray-100 rounded-full px-4 py-1 text-sm font-bold text-gray-600 mb-6">
-                Consistency Score: {{ score }}%
+
+            <div class="mb-12 relative">
+                <div class="text-xs font-bold text-gray-400 dark:text-gray-600 uppercase tracking-widest mb-6">Tier Progression</div>
+                
+                <div class="absolute top-6 left-0 w-full h-1 bg-gray-100 dark:bg-gray-800 rounded-full -z-10"></div>
+                
+                {% set grade_val = 1 %}
+                {% if grade == 'S' %}{% set grade_val = 5 %}
+                {% elif grade == 'A' %}{% set grade_val = 4 %}
+                {% elif grade == 'B' %}{% set grade_val = 3 %}
+                {% elif grade == 'C' %}{% set grade_val = 2 %}
+                {% endif %}
+
+                <div class="flex justify-between items-start px-2">
+                    {% set tiers = [('D', 'Rookie'), ('C', 'Scout'), ('B', 'Warrior'), ('A', 'Master'), ('S', 'Titan')] %}
+                    
+                    {% for tier_char, tier_name in tiers %}
+                        {% set loop_val = loop.index %}
+                        <div class="flex flex-col items-center relative group cursor-default">
+                            
+                            <div class="w-12 h-12 rounded-full flex items-center justify-center text-sm font-black border-4 transition-all duration-500 z-10
+                                {% if loop_val < grade_val %}
+                                    bg-indigo-100 dark:bg-indigo-900/30 text-indigo-400 border-indigo-50 dark:border-indigo-900/50
+                                {% elif loop_val == grade_val %}
+                                    bg-indigo-600 dark:bg-indigo-500 text-white border-indigo-100 dark:border-indigo-400/30 scale-125 shadow-xl shadow-indigo-500/30
+                                {% else %}
+                                    bg-white dark:bg-dark-card text-gray-300 dark:text-gray-700 border-gray-100 dark:border-gray-800
+                                {% endif %}">
+                                {{ tier_char }}
+                            </div>
+
+                            <div class="mt-3 text-[10px] uppercase font-bold tracking-wider transition-colors duration-300
+                                {% if loop_val == grade_val %} text-indigo-600 dark:text-indigo-400
+                                {% else %} text-gray-300 dark:text-gray-600 {% endif %}">
+                                {{ tier_name }}
+                            </div>
+                            
+                            {% if loop_val == grade_val %}
+                            <div class="absolute -top-8 text-indigo-500 dark:text-indigo-400 animate-bounce">
+                                <i class="fas fa-chevron-down"></i>
+                            </div>
+                            {% endif %}
+                        </div>
+                    {% endfor %}
+                </div>
             </div>
 
-            <hr class="border-gray-100 mb-6">
+            <hr class="border-gray-100 dark:border-gray-800 mb-8">
 
-            <div class="text-left bg-indigo-50 p-6 rounded-xl border border-indigo-100 flex gap-4">
-                <div class="text-3xl text-indigo-500">
+            <div class="text-left bg-indigo-50 dark:bg-indigo-900/10 p-8 rounded-3xl border border-indigo-100 dark:border-indigo-500/10 flex flex-col md:flex-row gap-6 items-start">
+                <div class="flex-shrink-0 w-12 h-12 bg-white dark:bg-indigo-900/30 rounded-2xl flex items-center justify-center text-2xl text-indigo-500 dark:text-indigo-400 shadow-sm">
                     <i class="fas fa-robot"></i>
                 </div>
                 <div>
-                    <h3 class="font-bold text-indigo-900 mb-1">Coach's Insight</h3>
-                    <p class="text-indigo-800 text-sm leading-relaxed">"{{ message }}"</p>
+                    <h3 class="font-bold text-indigo-900 dark:text-indigo-300 mb-2 text-lg">Coach's Insight</h3>
+                    <p class="text-indigo-800 dark:text-indigo-200/80 text-base leading-relaxed font-medium">"{{ message }}"</p>
                 </div>
             </div>
         </div>
     </div>
 
-    <div class="flex justify-center gap-4">
-        <a href="{{ url_for('main.dashboard') }}" class="px-6 py-3 bg-gray-800 text-white rounded-xl font-bold hover:bg-black transition shadow-lg">
-            Back to Action
+    <div class="flex justify-center gap-4 mb-12">
+        <a href="{{ url_for('main.dashboard') }}" class="px-8 py-4 bg-gray-900 dark:bg-white text-white dark:text-gray-900 rounded-2xl font-bold hover:bg-black dark:hover:bg-gray-200 transition shadow-xl hover:shadow-2xl hover:-translate-y-1 flex items-center">
+            <i class="fas fa-arrow-left mr-2"></i> Back to Focus
         </a>
-        <button onclick="window.print()" class="px-6 py-3 bg-white text-gray-600 border border-gray-200 rounded-xl font-bold hover:bg-gray-50 transition">
-            <i class="fas fa-print mr-2"></i> Save Report
+        <button onclick="window.print()" class="px-8 py-4 bg-white dark:bg-dark-card text-gray-600 dark:text-gray-300 border border-gray-200 dark:border-gray-700 rounded-2xl font-bold hover:bg-gray-50 dark:hover:bg-gray-800 transition flex items-center">
+            <i class="fas fa-download mr-2"></i> Save Report
         </button>
     </div>
 

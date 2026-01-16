@@ -3,62 +3,54 @@
 
 <div class="max-w-6xl mx-auto">
     
-    <div class="flex flex-col md:flex-row justify-between items-end mb-8 gap-4">
+    <div class="flex flex-col md:flex-row justify-between items-end mb-8 gap-6 animate-fade-in">
         <div>
-            <h1 class="text-3xl font-bold text-gray-800">Year in Pixels</h1>
-            <p class="text-gray-500">Your consistency map for {{ current_year }}.</p>
+            <h1 class="text-4xl font-extrabold text-gray-900 dark:text-white tracking-tight">Year in Pixels</h1>
+            <p class="text-gray-500 dark:text-gray-400 font-medium text-lg">Visualizing your consistency map.</p>
         </div>
         
         <div class="flex items-center gap-4">
-            <div class="hidden md:flex items-center gap-2 text-xs text-gray-400 mr-4">
-                <span>Less</span>
-                <div class="w-3 h-3 bg-gray-100 rounded-sm"></div>
-                <div class="w-3 h-3 bg-green-300 rounded-sm"></div>
-                <div class="w-3 h-3 bg-green-600 rounded-sm"></div>
-                <span>More</span>
-            </div>
-
             <div class="relative">
-                <select onchange="location = this.value;" class="appearance-none bg-white border border-gray-200 text-gray-700 py-2 pl-4 pr-8 rounded-lg font-bold shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 cursor-pointer">
+                <select onchange="location = this.value;" class="appearance-none bg-white dark:bg-dark-card border border-gray-200 dark:border-dark-border text-gray-700 dark:text-gray-200 py-3 pl-5 pr-10 rounded-xl font-bold shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 cursor-pointer transition">
                     {% for y in available_years %}
                     <option value="{{ url_for('main.full_calendar', year=y) }}" {% if y == current_year %}selected{% endif %}>
                         {{ y }}
                     </option>
                     {% endfor %}
                 </select>
-                <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-500">
+                <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-gray-500">
                     <i class="fas fa-chevron-down text-xs"></i>
                 </div>
             </div>
         </div>
     </div>
 
-    <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100 mb-8">
-        <div class="flex flex-col md:flex-row justify-between items-center mb-6">
-            <h3 class="font-bold text-gray-700 flex items-center mb-4 md:mb-0">
-                <i class="fas fa-chart-area mr-2 text-indigo-500"></i> Performance Trends
+    <div class="bg-white dark:bg-dark-card p-6 rounded-3xl shadow-sm border border-gray-100 dark:border-dark-border mb-8 animate-fade-in transition-colors duration-300" style="animation-delay: 0.1s;">
+        <div class="flex flex-col md:flex-row justify-between items-center mb-6 gap-4">
+            <h3 class="font-bold text-gray-700 dark:text-gray-200 flex items-center text-lg">
+                <i class="fas fa-chart-area mr-3 text-indigo-500"></i> Performance Trends
             </h3>
             
-            <div class="flex bg-gray-100 p-1 rounded-lg">
-                <button onclick="updateChart('daily')" id="btn-daily" class="px-4 py-1.5 rounded-md text-xs font-bold text-gray-500 hover:bg-white hover:shadow-sm transition">Daily</button>
-                <button onclick="updateChart('monthly')" id="btn-monthly" class="px-4 py-1.5 rounded-md text-xs font-bold bg-white text-indigo-600 shadow-sm transition">Monthly</button>
-                <button onclick="updateChart('yearly')" id="btn-yearly" class="px-4 py-1.5 rounded-md text-xs font-bold text-gray-500 hover:bg-white hover:shadow-sm transition">All Time</button>
+            <div class="flex bg-gray-100 dark:bg-gray-800 p-1 rounded-xl">
+                <button onclick="updateChart('daily')" id="btn-daily" class="px-5 py-2 rounded-lg text-xs font-bold text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition">Daily</button>
+                <button onclick="updateChart('monthly')" id="btn-monthly" class="px-5 py-2 rounded-lg text-xs font-bold bg-white dark:bg-indigo-600 text-indigo-600 dark:text-white shadow-sm transition">Monthly</button>
+                <button onclick="updateChart('yearly')" id="btn-yearly" class="px-5 py-2 rounded-lg text-xs font-bold text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition">All Time</button>
             </div>
         </div>
         
-        <div class="h-64">
+        <div class="h-72">
             <canvas id="yearChart"></canvas>
         </div>
     </div>
 
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 animate-fade-in" style="animation-delay: 0.2s;">
         {% for month in cal_data %}
-        <div class="bg-white p-5 rounded-xl shadow-sm border border-gray-100 hover:shadow-md transition">
-            <h3 class="font-bold text-gray-700 mb-3 text-center">{{ month.name }}</h3>
+        <div class="bg-white dark:bg-dark-card p-5 rounded-3xl shadow-sm border border-gray-100 dark:border-dark-border hover:shadow-xl dark:hover:shadow-2xl transition-all duration-300 group hover:-translate-y-1">
+            <h3 class="font-bold text-gray-700 dark:text-gray-200 mb-4 text-center">{{ month.name }}</h3>
             
             <div class="grid grid-cols-7 gap-1 text-center">
                 {% for d in ['M', 'T', 'W', 'T', 'F', 'S', 'S'] %}
-                    <div class="text-[10px] font-bold text-gray-300">{{ d }}</div>
+                    <div class="text-[10px] font-bold text-gray-300 dark:text-gray-600">{{ d }}</div>
                 {% endfor %}
 
                 {% for week in month.weeks %}
@@ -68,21 +60,21 @@
                             {% set d_str = '%04d-%02d-%02d' % (current_year, month.index, day) %}
                             {% set count = activity_map.get(d_str, 0) %}
                             
-                            {% set intensity_class = 'bg-gray-50' %}
+                            {% set intensity_class = 'bg-gray-50 dark:bg-gray-800 text-gray-400 dark:text-gray-600' %}
                             {% if count > 0 %}
                                 {% set ratio = count / max_activity %}
-                                {% if ratio < 0.25 %}{% set intensity_class = 'bg-green-200' %}
-                                {% elif ratio < 0.50 %}{% set intensity_class = 'bg-green-300' %}
-                                {% elif ratio < 0.75 %}{% set intensity_class = 'bg-green-400' %}
-                                {% else %}{% set intensity_class = 'bg-green-600 text-white' %}
+                                {% if ratio < 0.25 %}{% set intensity_class = 'bg-green-200 dark:bg-green-900/40 text-green-700 dark:text-green-300' %}
+                                {% elif ratio < 0.50 %}{% set intensity_class = 'bg-green-300 dark:bg-green-700/60 text-green-800 dark:text-green-200' %}
+                                {% elif ratio < 0.75 %}{% set intensity_class = 'bg-green-400 dark:bg-green-600 text-white' %}
+                                {% else %}{% set intensity_class = 'bg-green-600 dark:bg-green-500 text-white shadow-[0_0_10px_rgba(34,197,94,0.4)]' %}
                                 {% endif %}
                             {% endif %}
 
-                            <div class="w-full aspect-square rounded-md flex items-center justify-center text-xs cursor-default relative group {{ intensity_class }}">
-                                <span class="{% if count == 0 %}text-gray-300{% endif %}">{{ day }}</span>
-                                
-                                <div class="absolute bottom-full mb-1 hidden group-hover:block bg-gray-900 text-white text-[10px] p-1.5 rounded z-10 whitespace-nowrap shadow-xl">
+                            <div class="w-full aspect-square rounded-lg flex items-center justify-center text-[10px] font-bold cursor-default relative group/day {{ intensity_class }} transition-colors duration-300">
+                                {{ day }}
+                                <div class="absolute bottom-full mb-2 hidden group-hover/day:block bg-gray-900 dark:bg-white text-white dark:text-gray-900 text-xs font-bold px-2 py-1 rounded-lg z-20 whitespace-nowrap shadow-xl">
                                     {{ count }} habits
+                                    <div class="absolute top-full left-1/2 -translate-x-1/2 border-4 border-transparent border-t-gray-900 dark:border-t-white"></div>
                                 </div>
                             </div>
                         {% endif %}
@@ -96,29 +88,29 @@
 </div>
 
 <script>
-    // 1. Load Data passed from Flask
     const chartData = {{ chart_data | tojson }};
     const ctx = document.getElementById('yearChart').getContext('2d');
     let myChart;
 
-    // Gradient Setup
+    // Check Dark Mode for Chart Colors
+    const isDark = document.documentElement.classList.contains('dark');
+    const gridColor = isDark ? '#334155' : '#f3f4f6';
+    const textColor = isDark ? '#94a3b8' : '#6b7280';
+
     const gradient = ctx.createLinearGradient(0, 0, 0, 400);
-    gradient.addColorStop(0, 'rgba(79, 70, 229, 0.4)'); // Indigo
-    gradient.addColorStop(1, 'rgba(79, 70, 229, 0.0)');
+    gradient.addColorStop(0, isDark ? 'rgba(99, 102, 241, 0.5)' : 'rgba(79, 70, 229, 0.4)');
+    gradient.addColorStop(1, isDark ? 'rgba(99, 102, 241, 0.0)' : 'rgba(79, 70, 229, 0.0)');
 
     function initChart(type) {
-        // Destroy old chart if it exists to allow update
         if (myChart) myChart.destroy();
-
-        // Get config based on type (daily/monthly/yearly)
         const config = chartData[type];
         
-        // Update Button Styling
+        // Update Buttons
         document.querySelectorAll('button[id^="btn-"]').forEach(b => {
-            b.className = "px-4 py-1.5 rounded-md text-xs font-bold text-gray-500 hover:bg-white hover:shadow-sm transition";
+            b.className = "px-5 py-2 rounded-lg text-xs font-bold text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition";
         });
         const activeBtn = document.getElementById('btn-' + type);
-        activeBtn.className = "px-4 py-1.5 rounded-md text-xs font-bold bg-white text-indigo-600 shadow-sm transition";
+        activeBtn.className = "px-5 py-2 rounded-lg text-xs font-bold bg-white dark:bg-indigo-600 text-indigo-600 dark:text-white shadow-sm transition";
 
         myChart = new Chart(ctx, {
             type: 'line',
@@ -127,47 +119,44 @@
                 datasets: [{
                     label: 'Habits Completed',
                     data: config.data,
-                    borderColor: '#4F46E5',
+                    borderColor: '#6366f1',
                     backgroundColor: gradient,
-                    borderWidth: 2,
-                    pointBackgroundColor: '#ffffff',
-                    pointBorderColor: '#4F46E5',
-                    pointRadius: type === 'daily' ? 0 : 4, // Hide dots on daily view
+                    borderWidth: 3,
+                    pointBackgroundColor: isDark ? '#1e293b' : '#ffffff',
+                    pointBorderColor: '#6366f1',
+                    pointBorderWidth: 3,
+                    pointRadius: type === 'daily' ? 0 : 4,
                     pointHoverRadius: 6,
                     fill: true,
-                    tension: 0.3
+                    tension: 0.4
                 }]
             },
             options: {
                 responsive: true,
                 maintainAspectRatio: false,
-                interaction: {
-                    mode: 'index',
-                    intersect: false,
-                },
+                interaction: { mode: 'index', intersect: false },
                 plugins: {
                     legend: { display: false },
                     tooltip: {
-                        backgroundColor: '#1f2937',
+                        backgroundColor: isDark ? '#f8fafc' : '#1f2937',
+                        titleColor: isDark ? '#0f172a' : '#fff',
+                        bodyColor: isDark ? '#334155' : '#fff',
                         padding: 12,
-                        cornerRadius: 8,
-                        displayColors: false,
-                        callbacks: {
-                            title: function(context) {
-                                return context[0].label;
-                            }
-                        }
+                        cornerRadius: 12,
+                        displayColors: false
                     }
                 },
                 scales: {
                     y: {
                         beginAtZero: true,
-                        grid: { borderDash: [5, 5], color: '#f3f4f6' }
+                        grid: { borderDash: [5, 5], color: gridColor },
+                        ticks: { color: textColor }
                     },
                     x: {
                         grid: { display: false },
-                        ticks: {
-                            maxTicksLimit: type === 'daily' ? 12 : 20 // Limit labels on X-axis
+                        ticks: { 
+                            color: textColor,
+                            maxTicksLimit: type === 'daily' ? 12 : 12 
                         }
                     }
                 }
@@ -175,10 +164,7 @@
         });
     }
 
-    // Initialize Default View
     initChart('monthly');
-
-    // Expose function to buttons
     window.updateChart = initChart;
 </script>
 

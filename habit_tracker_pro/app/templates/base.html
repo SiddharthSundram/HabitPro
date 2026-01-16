@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="scroll-smooth">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -8,155 +8,244 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;700;800&display=swap" rel="stylesheet">
     
     <link rel="manifest" href="{{ url_for('static', filename='manifest.json') }}">
     <meta name="theme-color" content="#4F46E5">
     <link rel="apple-touch-icon" href="{{ url_for('static', filename='icons/icon-192.png') }}">
 
-    <style>
-        body { font-family: 'Inter', sans-serif; }
-        /* Smooth Page Fade In */
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['Outfit', 'sans-serif'] },
+                    colors: {
+                        dark: {
+                            bg: '#0f172a',      // Deep Blue-Black
+                            card: '#1e293b',    // Lighter Blue-Black
+                            border: '#334155',  // Slate Border
+                            hover: '#334155'
+                        },
+                        brand: {
+                            light: '#4F46E5',   // Indigo 600
+                            dark: '#6366f1'     // Indigo 500
+                        }
+                    }
+                }
+            }
         }
+    </script>
+
+    <style>
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
         .animate-fade-in { animation: fadeIn 0.4s ease-out forwards; }
         
-        /* Mobile Nav Padding */
-        @media (max-width: 768px) {
-            body { padding-bottom: 80px; }
-        }
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+        .dark ::-webkit-scrollbar-thumb { background: #475569; }
+        
+        @media (max-width: 768px) { body { padding-bottom: 90px; } }
     </style>
+
+    <script>
+        if (localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            document.documentElement.classList.add('dark');
+        } else {
+            document.documentElement.classList.remove('dark');
+        }
+    </script>
 </head>
-<body class="bg-gray-50 text-gray-800 min-h-screen flex flex-col">
+<body class="bg-gray-50 text-gray-800 dark:bg-dark-bg dark:text-gray-100 min-h-screen flex flex-col transition-colors duration-300">
 
-    <nav class="bg-white border-b border-gray-200 sticky top-0 z-40">
-        <div class="max-w-6xl mx-auto px-4 h-16 flex justify-between items-center">
-            <a href="/" class="text-xl font-extrabold text-indigo-600 flex items-center tracking-tight">
-                <i class="fas fa-layer-group mr-2"></i>HabitPro
-            </a>
+    <nav class="fixed w-full top-0 z-50 transition-all duration-300">
+        <div class="absolute inset-0 bg-white/70 dark:bg-dark-bg/80 backdrop-blur-xl border-b border-gray-200/50 dark:border-white/5"></div>
+        
+        <div class="max-w-7xl mx-auto px-6 h-20 flex justify-between items-center relative z-10">
             
+            <a href="/" class="flex items-center gap-2 group">
+                <div class="w-10 h-10 bg-gradient-to-br from-indigo-600 to-purple-600 rounded-xl flex items-center justify-center text-white shadow-lg shadow-indigo-500/30 transition transform group-hover:scale-110">
+                    <i class="fas fa-layer-group"></i>
+                </div>
+                <span class="text-2xl font-black bg-clip-text text-transparent bg-gradient-to-r from-gray-900 to-gray-600 dark:from-white dark:to-gray-400">
+                    HabitPro
+                </span>
+            </a>
+
             {% if current_user.is_authenticated %}
-            <div class="flex items-center space-x-6">
-                <a href="{{ url_for('main.profile') }}" class="flex items-center gap-2 group">
-                    <img src="{{ current_user.avatar() }}" class="w-8 h-8 rounded-full border border-indigo-200 group-hover:border-indigo-600 transition">
-                    <span class="text-sm font-semibold text-gray-600 group-hover:text-indigo-600 hidden md:block transition">{{ current_user.username }}</span>
-                </a>
-
-                <a href="{{ url_for('main.leaderboard') }}" class="text-gray-500 hover:text-indigo-600 font-bold text-sm hidden md:block">
-                    <i class="fas fa-medal mr-1"></i> Rank
-                </a>
-
-                <a href="{{ url_for('main.full_calendar') }}" class="text-gray-500 hover:text-indigo-600 font-bold text-sm hidden md:block">
-                    <i class="fas fa-calendar-alt mr-1"></i> Year View
-                </a>
-
-                <a href="{{ url_for('main.create_habit') }}" class="hidden md:flex bg-gray-900 text-white px-4 py-2 rounded-lg text-sm font-bold hover:bg-black transition shadow-sm items-center">
-                    <i class="fas fa-plus mr-2"></i> New Habit
-                </a>
-                
-                <a href="{{ url_for('main.logout') }}" class="text-gray-400 hover:text-red-500 transition" title="Log Out">
-                    <i class="fas fa-sign-out-alt text-lg"></i>
-                </a>
-            </div>
-            {% else %}
-            <div class="space-x-4">
-                <a href="{{ url_for('main.login') }}" class="text-sm font-bold text-gray-600 hover:text-indigo-600">Login</a>
-                <a href="{{ url_for('main.register') }}" class="bg-indigo-600 text-white px-4 py-2 rounded-lg text-sm font-bold hover:bg-indigo-700 transition">Get Started</a>
+            <div class="hidden md:flex items-center bg-gray-100/50 dark:bg-white/5 px-2 py-1.5 rounded-full border border-gray-200 dark:border-white/10 backdrop-blur-md">
+                <a href="{{ url_for('main.dashboard') }}" class="px-5 py-2 rounded-full text-sm font-bold text-gray-600 dark:text-gray-300 hover:bg-white dark:hover:bg-white/10 hover:text-indigo-600 dark:hover:text-white hover:shadow-sm transition-all">Focus</a>
+                <a href="{{ url_for('main.full_calendar') }}" class="px-5 py-2 rounded-full text-sm font-bold text-gray-600 dark:text-gray-300 hover:bg-white dark:hover:bg-white/10 hover:text-indigo-600 dark:hover:text-white hover:shadow-sm transition-all">Year</a>
+                <a href="{{ url_for('main.leaderboard') }}" class="px-5 py-2 rounded-full text-sm font-bold text-gray-600 dark:text-gray-300 hover:bg-white dark:hover:bg-white/10 hover:text-indigo-600 dark:hover:text-white hover:shadow-sm transition-all">Rank</a>
+                <a href="{{ url_for('main.report') }}" class="px-5 py-2 rounded-full text-sm font-bold text-gray-600 dark:text-gray-300 hover:bg-white dark:hover:bg-white/10 hover:text-indigo-600 dark:hover:text-white hover:shadow-sm transition-all">Coach</a>
             </div>
             {% endif %}
+            
+            <div class="flex items-center gap-4">
+                <button onclick="toggleTheme()" class="w-10 h-10 rounded-full border border-gray-200 dark:border-white/10 flex items-center justify-center text-gray-500 dark:text-yellow-400 hover:bg-gray-100 dark:hover:bg-white/5 transition">
+                    <i class="fas fa-sun hidden dark:block"></i>
+                    <i class="fas fa-moon dark:hidden"></i>
+                </button>
+
+                {% if current_user.is_authenticated %}
+                    <a href="{{ url_for('main.profile') }}" class="flex items-center gap-3 pl-1 pr-4 py-1 rounded-full border border-gray-200 dark:border-white/10 hover:bg-gray-100 dark:hover:bg-white/5 transition group">
+                        <img src="{{ current_user.avatar() }}" class="w-8 h-8 rounded-full object-cover border border-white dark:border-gray-600">
+                        <span class="text-sm font-bold text-gray-700 dark:text-gray-200 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 hidden md:block">
+                            {{ current_user.username.split()[0] }}
+                        </span>
+                    </a>
+                {% else %}
+                    <div class="hidden md:flex gap-3">
+                        <a href="{{ url_for('main.login') }}" class="px-5 py-2.5 rounded-xl font-bold text-sm text-gray-600 dark:text-gray-300 hover:text-indigo-600 dark:hover:text-white transition">Log In</a>
+                        <a href="{{ url_for('main.register') }}" class="px-5 py-2.5 rounded-xl font-bold text-sm bg-gray-900 dark:bg-white text-white dark:text-gray-900 hover:scale-105 transition shadow-lg">Get Started</a>
+                    </div>
+                {% endif %}
+            </div>
         </div>
     </nav>
 
-    <div class="fixed top-20 right-4 z-50 w-full max-w-sm pointer-events-none">
+    <div class="h-24"></div>
+
+    <div class="fixed top-24 right-6 z-50 w-full max-w-sm pointer-events-none">
         {% with messages = get_flashed_messages(with_categories=true) %}
             {% if messages %}
                 {% for category, message in messages %}
-                    <div class="flash-message pointer-events-auto p-4 rounded-xl shadow-2xl mb-3 text-white font-semibold flex items-center transform transition-all duration-500 translate-x-0
-                        {% if category == 'error' %}bg-red-500{% else %}bg-green-500{% endif %}">
-                        <div class="mr-3 text-xl">
-                            {% if category == 'error' %}<i class="fas fa-times-circle"></i>
-                            {% else %}<i class="fas fa-check-circle"></i>{% endif %}
-                        </div>
-                        <div>{{ message }}</div>
+                    <div class="flash-message pointer-events-auto p-4 rounded-2xl shadow-2xl mb-4 text-white font-bold flex items-center transform transition-all duration-500 translate-x-0 backdrop-blur-md border border-white/20
+                        {% if category == 'error' %}bg-red-500/90{% else %}bg-emerald-500/90{% endif %}">
+                        <i class="fas {% if category == 'error' %}fa-exclamation-circle{% else %}fa-check-circle{% endif %} text-xl mr-3"></i>
+                        {{ message }}
                     </div>
                 {% endfor %}
             {% endif %}
         {% endwith %}
     </div>
 
-    <main class="max-w-6xl mx-auto px-4 py-8 flex-grow w-full animate-fade-in">
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 py-8 flex-grow w-full animate-fade-in relative z-0">
         {% block content %}{% endblock %}
     </main>
     
-    <footer class="bg-white border-t border-gray-200 mt-auto">
-        <div class="max-w-6xl mx-auto px-4 py-8 text-center text-gray-400 text-sm">
-            <p>&copy; 2026 HabitPro. Built for consistency.</p>
+   <footer class="bg-white dark:bg-dark-card border-t border-gray-200 dark:border-white/10 mt-auto transition-colors duration-300 relative z-10">
+        <div class="max-w-7xl mx-auto px-6 py-16">
+            <div class="grid grid-cols-1 md:grid-cols-12 gap-12">
+                
+                <div class="md:col-span-4">
+                    <a href="/" class="flex items-center gap-2 mb-4">
+                        <div class="w-8 h-8 bg-indigo-600 rounded-lg flex items-center justify-center text-white">
+                            <i class="fas fa-layer-group text-sm"></i>
+                        </div>
+                        <span class="text-xl font-extrabold text-gray-900 dark:text-white">HabitPro</span>
+                    </a>
+                    <p class="text-gray-500 dark:text-gray-400 text-sm mb-6 leading-relaxed">
+                        Master your daily routine with AI-powered insights and gamified tracking. Built for consistency.
+                    </p>
+                    
+                    <div class="bg-gray-50 dark:bg-white/5 p-5 rounded-2xl border border-gray-100 dark:border-white/10">
+                        <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-3">Designed & Built By</p>
+                        <div class="flex items-center gap-4">
+                            <div class="w-12 h-12 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white font-bold text-lg shadow-lg">
+                                SS
+                            </div>
+                            <div>
+                                <p class="text-base font-bold text-gray-900 dark:text-white">Siddharth Sundram</p>
+                                <p class="text-xs text-indigo-500 dark:text-indigo-400 font-medium">Full Stack Developer</p>
+                            </div>
+                        </div>
+
+                        <div class="flex gap-3 mt-4">
+                            <a href="#" target="_blank" class="w-8 h-8 rounded-lg bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 flex items-center justify-center text-gray-500 hover:text-blue-600 dark:hover:text-blue-400 hover:border-blue-200 transition shadow-sm">
+                                <i class="fab fa-linkedin-in"></i>
+                            </a>
+                            <a href="#" target="_blank" class="w-8 h-8 rounded-lg bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 flex items-center justify-center text-gray-500 hover:text-pink-600 dark:hover:text-pink-400 hover:border-pink-200 transition shadow-sm">
+                                <i class="fab fa-instagram"></i>
+                            </a>
+                            <a href="mailto:sidsundram@gmail.com" class="w-8 h-8 rounded-lg bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 flex items-center justify-center text-gray-500 hover:text-red-500 dark:hover:text-red-400 hover:border-red-200 transition shadow-sm">
+                                <i class="fas fa-envelope"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="md:col-span-3 md:pl-8">
+                    <h3 class="font-bold text-gray-900 dark:text-white mb-6">Explore</h3>
+                    <ul class="space-y-4 text-sm font-medium text-gray-500 dark:text-gray-400">
+                        <li><a href="/" class="hover:text-indigo-600 dark:hover:text-white transition">Home</a></li>
+                        <li><a href="{{ url_for('main.about') }}" class="hover:text-indigo-600 dark:hover:text-white transition">About Us</a></li>
+                        <li><a href="{{ url_for('main.privacy') }}" class="hover:text-indigo-600 dark:hover:text-white transition">Privacy Policy</a></li>
+                        <li><a href="{{ url_for('main.terms') }}" class="hover:text-indigo-600 dark:hover:text-white transition">Terms of Service</a></li>
+                    </ul>
+                </div>
+
+                <div class="md:col-span-5">
+                    <h3 class="font-bold text-gray-900 dark:text-white mb-2">Feedback & Support</h3>
+                    <p class="text-xs text-gray-500 dark:text-gray-400 mb-4">Found a bug or have a suggestion? Email me directly.</p>
+                    
+                    <form action="{{ url_for('main.submit_feedback') }}" method="POST" class="space-y-3">
+                        {% if not current_user.is_authenticated %}
+                        <input type="email" name="email" placeholder="Your Email Address" required
+                               class="w-full px-4 py-3 rounded-xl bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 text-sm focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 outline-none transition text-gray-800 dark:text-white placeholder-gray-400">
+                        {% endif %}
+                        <div class="relative">
+                            <textarea name="message" rows="3" placeholder="Type your message here..." required
+                                      class="w-full px-4 py-3 rounded-xl bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 text-sm focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 outline-none transition text-gray-800 dark:text-white placeholder-gray-400 resize-none"></textarea>
+                            <button type="submit" class="absolute bottom-2 right-2 bg-indigo-600 text-white w-8 h-8 rounded-lg flex items-center justify-center hover:bg-indigo-700 transition shadow-md">
+                                <i class="fas fa-paper-plane text-xs"></i>
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            
+            <div class="border-t border-gray-200 dark:border-white/10 mt-16 pt-8 text-center">
+                <p class="text-gray-400 text-xs font-medium">
+                    &copy; 2026 HabitPro. Developed with <i class="fas fa-heart text-red-500 mx-1"></i> by <span class="text-indigo-600 dark:text-indigo-400 font-bold">Siddharth Sundram</span>.
+                </p>
+            </div>
         </div>
     </footer>
 
     {% if current_user.is_authenticated %}
-    <nav class="md:hidden fixed bottom-0 left-0 w-full bg-white border-t border-gray-200 z-50 pb-safe shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)]">
-        <div class="flex justify-around items-center h-16">
-            <a href="{{ url_for('main.dashboard') }}" class="flex flex-col items-center justify-center w-full h-full text-gray-400 hover:text-indigo-600 focus:text-indigo-600">
-                <i class="fas fa-home text-xl mb-1"></i>
-                <span class="text-[10px] font-bold">Focus</span>
+    <nav class="md:hidden fixed bottom-0 left-0 w-full bg-white/95 dark:bg-dark-card/95 backdrop-blur-lg border-t border-gray-200 dark:border-dark-border z-50 pb-safe shadow-[0_-4px_20px_rgba(0,0,0,0.1)] transition-colors duration-300">
+        <div class="flex justify-around items-center h-20 pb-2">
+            <a href="{{ url_for('main.dashboard') }}" class="flex flex-col items-center justify-center w-full h-full text-gray-400 hover:text-indigo-500 dark:hover:text-indigo-400 {{ 'text-indigo-600 dark:text-indigo-400' if request.endpoint == 'main.dashboard' }}">
+                <i class="fas fa-home text-xl mb-1"></i><span class="text-[10px] font-bold">Focus</span>
             </a>
-            
-            <a href="{{ url_for('main.report') }}" class="flex flex-col items-center justify-center w-full h-full text-gray-400 hover:text-indigo-600 focus:text-indigo-600">
-                <i class="fas fa-brain text-xl mb-1"></i>
-                <span class="text-[10px] font-bold">Coach</span>
+            <a href="{{ url_for('main.full_calendar') }}" class="flex flex-col items-center justify-center w-full h-full text-gray-400 hover:text-indigo-500 dark:hover:text-indigo-400 {{ 'text-indigo-600 dark:text-indigo-400' if request.endpoint == 'main.full_calendar' }}">
+                <i class="fas fa-calendar-alt text-xl mb-1"></i><span class="text-[10px] font-bold">Year</span>
             </a>
-
-            <div class="relative -top-6">
-                <a href="{{ url_for('main.create_habit') }}" class="bg-indigo-600 text-white w-14 h-14 rounded-full flex items-center justify-center shadow-xl hover:bg-indigo-700 transform hover:scale-105 transition border-4 border-gray-50">
+            <div class="relative -top-6 w-full flex justify-center">
+                <a href="{{ url_for('main.create_habit') }}" class="bg-indigo-600 dark:bg-indigo-500 text-white w-14 h-14 rounded-full flex items-center justify-center shadow-xl hover:scale-105 transition border-4 border-gray-50 dark:border-dark-bg">
                     <i class="fas fa-plus text-2xl"></i>
                 </a>
             </div>
-
-            <a href="{{ url_for('main.leaderboard') }}" class="flex flex-col items-center justify-center w-full h-full text-gray-400 hover:text-indigo-600 focus:text-indigo-600">
-                <i class="fas fa-trophy text-xl mb-1"></i>
-                <span class="text-[10px] font-bold">Rank</span>
+            <a href="{{ url_for('main.leaderboard') }}" class="flex flex-col items-center justify-center w-full h-full text-gray-400 hover:text-indigo-500 dark:hover:text-indigo-400 {{ 'text-indigo-600 dark:text-indigo-400' if request.endpoint == 'main.leaderboard' }}">
+                <i class="fas fa-trophy text-xl mb-1"></i><span class="text-[10px] font-bold">Rank</span>
             </a>
-
-            <a href="{{ url_for('main.full_calendar') }}" class="flex flex-col items-center justify-center w-full h-full text-gray-400 hover:text-indigo-600 focus:text-indigo-600">
-                <i class="fas fa-calendar-alt text-xl mb-1"></i>
-                <span class="text-[10px] font-bold">Year</span>
-            </a>
-
-            <a href="{{ url_for('main.profile') }}" class="flex flex-col items-center justify-center w-full h-full text-gray-400 hover:text-indigo-600 focus:text-indigo-600">
-                <i class="fas fa-user text-xl mb-1"></i>
-                <span class="text-[10px] font-bold">Me</span>
+            <a href="{{ url_for('main.profile') }}" class="flex flex-col items-center justify-center w-full h-full text-gray-400 hover:text-indigo-500 dark:hover:text-indigo-400 {{ 'text-indigo-600 dark:text-indigo-400' if request.endpoint == 'main.profile' }}">
+                <i class="fas fa-user text-xl mb-1"></i><span class="text-[10px] font-bold">Me</span>
             </a>
         </div>
     </nav>
     {% endif %}
 
     <script>
-        // 1. Auto-Dismiss Flash Messages
-        document.addEventListener('DOMContentLoaded', function() {
-            const alerts = document.querySelectorAll('.flash-message');
-            if (alerts.length > 0) {
-                setTimeout(function() {
-                    alerts.forEach(alert => {
-                        alert.style.transform = "translateX(100%)";
-                        alert.style.opacity = "0";
-                        setTimeout(() => alert.remove(), 500);
-                    });
-                }, 4000);
+        function toggleTheme() {
+            if (document.documentElement.classList.contains('dark')) {
+                document.documentElement.classList.remove('dark');
+                localStorage.theme = 'light';
+            } else {
+                document.documentElement.classList.add('dark');
+                localStorage.theme = 'dark';
             }
+        }
+        document.addEventListener('DOMContentLoaded', () => {
+            const alerts = document.querySelectorAll('.flash-message');
+            if (alerts.length > 0) setTimeout(() => alerts.forEach(a => a.remove()), 4000);
         });
-
-        // 2. Service Worker Registration (ROOT PATH FIX)
         if ('serviceWorker' in navigator) {
-            window.addEventListener('load', () => {
-                // IMPORTANT: This points to the ROOT, not static
-                navigator.serviceWorker.register("/sw.js")
-                    .then(reg => console.log('SW Registered!', reg.scope))
-                    .catch(err => console.log('SW Failed:', err));
-            });
+            window.addEventListener('load', () => navigator.serviceWorker.register("/sw.js"));
         }
     </script>
 </body>

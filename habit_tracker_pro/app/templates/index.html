@@ -1,146 +1,392 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="scroll-smooth">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>HabitPro - Gamify Your Growth</title>
+    
     <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&display=swap" rel="stylesheet">
-    <style>
-        body { font-family: 'Inter', sans-serif; }
-        .blob { position: absolute; filter: blur(40px); z-index: -1; opacity: 0.4; }
-        @keyframes float {
-            0% { transform: translateY(0px); }
-            50% { transform: translateY(-20px); }
-            100% { transform: translateY(0px); }
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;700;800&display=swap" rel="stylesheet">
+    
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['Outfit', 'sans-serif'] },
+                    colors: {
+                        dark: { bg: '#0f172a', card: '#1e293b', border: '#334155' }
+                    }
+                }
+            }
         }
+        if (localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            document.documentElement.classList.add('dark');
+        }
+    </script>
+    
+    <style>
+        .blob { position: absolute; filter: blur(80px); z-index: -1; opacity: 0.6; }
+        @keyframes float { 0% { transform: translateY(0px); } 50% { transform: translateY(-20px); } 100% { transform: translateY(0px); } }
         .floating { animation: float 6s ease-in-out infinite; }
+        .text-gradient { background-clip: text; -webkit-background-clip: text; color: transparent; background-image: linear-gradient(to right, #4F46E5, #9333EA); }
     </style>
 </head>
-<body class="bg-white text-gray-800 overflow-x-hidden">
+<body class="bg-gray-50 text-gray-800 dark:bg-dark-bg dark:text-gray-100 overflow-x-hidden transition-colors duration-300">
 
-    <nav class="max-w-7xl mx-auto px-6 h-20 flex justify-between items-center">
-        <a href="/" class="text-2xl font-extrabold text-indigo-600 flex items-center tracking-tight">
-            <i class="fas fa-layer-group mr-2"></i>HabitPro
-        </a>
-        <div class="space-x-4">
-            <a href="{{ url_for('main.login') }}" class="text-sm font-bold text-gray-500 hover:text-indigo-600 transition">Log In</a>
-            <a href="{{ url_for('main.register') }}" class="bg-gray-900 text-white px-5 py-2.5 rounded-lg text-sm font-bold hover:bg-black transition shadow-lg">Get Started</a>
+    <nav class="fixed w-full top-0 z-50 transition-all duration-300 backdrop-blur-xl border-b border-white/20 dark:border-white/5 bg-white/70 dark:bg-dark-bg/80">
+        <div class="max-w-7xl mx-auto px-6 h-20 flex justify-between items-center">
+            
+            <a href="/" class="flex items-center gap-2 group">
+                <div class="w-10 h-10 bg-indigo-600 rounded-xl flex items-center justify-center text-white shadow-lg group-hover:scale-110 transition">
+                    <i class="fas fa-layer-group"></i>
+                </div>
+                <span class="text-2xl font-black text-gray-900 dark:text-white tracking-tight">HabitPro</span>
+            </a>
+            
+            <div class="flex items-center gap-4">
+                <button onclick="toggleTheme()" class="w-10 h-10 rounded-full border border-gray-200 dark:border-white/10 flex items-center justify-center text-gray-500 dark:text-yellow-400 hover:bg-gray-100 dark:hover:bg-white/5 transition shadow-sm">
+                    <i class="fas fa-sun hidden dark:block"></i>
+                    <i class="fas fa-moon dark:hidden"></i>
+                </button>
+
+                {% if current_user.is_authenticated %}
+                    <a href="{{ url_for('main.dashboard') }}" class="hidden sm:flex items-center gap-2 bg-indigo-50 dark:bg-white/10 px-4 py-2 rounded-xl text-indigo-600 dark:text-white font-bold text-sm hover:bg-indigo-100 dark:hover:bg-white/20 transition">
+                        <i class="fas fa-columns"></i> Dashboard
+                    </a>
+                    <a href="{{ url_for('main.create_habit') }}" class="bg-indigo-600 dark:bg-white text-white dark:text-gray-900 px-5 py-2.5 rounded-xl text-sm font-bold hover:scale-105 transition shadow-xl">
+                        <i class="fas fa-plus mr-1"></i> New Habit
+                    </a>
+                {% else %}
+                    <a href="{{ url_for('main.login') }}" class="text-sm font-bold text-gray-600 dark:text-gray-300 hover:text-indigo-600 dark:hover:text-white transition hidden sm:block">Log In</a>
+                    <a href="{{ url_for('main.register') }}" class="bg-gray-900 dark:bg-white text-white dark:text-gray-900 px-6 py-2.5 rounded-xl text-sm font-bold hover:scale-105 transition shadow-xl shadow-indigo-500/20">Get Started</a>
+                {% endif %}
+            </div>
         </div>
     </nav>
 
-    <header class="relative max-w-7xl mx-auto px-6 pt-20 pb-32 text-center lg:text-left lg:flex items-center gap-12">
-        <div class="blob bg-indigo-300 w-72 h-72 rounded-full top-0 left-0 mix-blend-multiply animate-blob"></div>
-        <div class="blob bg-purple-300 w-72 h-72 rounded-full top-0 right-0 mix-blend-multiply animate-blob animation-delay-2000"></div>
+    <div class="fixed top-24 right-6 z-50 w-full max-w-sm pointer-events-none">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="flash-message pointer-events-auto p-4 rounded-2xl shadow-2xl mb-4 text-white font-bold flex items-center transform transition-all duration-500 translate-x-0 backdrop-blur-md border border-white/20
+                        {% if category == 'error' %}bg-red-500/90{% else %}bg-emerald-500/90{% endif %}">
+                        <i class="fas {% if category == 'error' %}fa-exclamation-circle{% else %}fa-check-circle{% endif %} text-xl mr-3"></i>
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+    </div>
+
+    <header class="relative max-w-7xl mx-auto px-6 pt-32 pb-20 lg:pt-40 lg:pb-32 text-center lg:text-left lg:flex items-center gap-16">
+        <div class="blob bg-indigo-400/30 w-96 h-96 rounded-full top-0 left-0 mix-blend-multiply dark:mix-blend-normal dark:opacity-20 animate-blob"></div>
+        <div class="blob bg-purple-400/30 w-96 h-96 rounded-full top-0 right-0 mix-blend-multiply dark:mix-blend-normal dark:opacity-20 animate-blob animation-delay-2000"></div>
 
         <div class="lg:w-1/2 relative z-10">
-            <div class="inline-block bg-indigo-50 text-indigo-600 px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider mb-6 border border-indigo-100">
-                🚀 Version 2.0 Now Live
+            <div class="inline-flex items-center gap-2 bg-white dark:bg-white/5 border border-indigo-100 dark:border-white/10 px-4 py-1.5 rounded-full text-xs font-bold text-indigo-600 dark:text-indigo-300 uppercase tracking-wider mb-8 shadow-sm">
+                <span class="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
+                Built by Siddharth Sundram
             </div>
-            <h1 class="text-5xl lg:text-7xl font-extrabold text-gray-900 leading-tight mb-6">
-                Build habits that <span class="text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-purple-600">actually stick.</span>
+            
+            <h1 class="text-5xl lg:text-7xl font-extrabold text-gray-900 dark:text-white leading-[1.1] mb-6 tracking-tight">
+                Build habits that <br>
+                <span class="text-gradient">actually stick.</span>
             </h1>
-            <p class="text-lg text-gray-500 mb-8 leading-relaxed max-w-lg mx-auto lg:mx-0">
+            
+            <p class="text-lg text-gray-500 dark:text-gray-400 mb-10 leading-relaxed max-w-lg mx-auto lg:mx-0">
                 Stop relying on willpower. Use gamification, focus timers, and AI-powered insights to master your daily routine.
             </p>
+            
             <div class="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
-                <a href="{{ url_for('main.login') }}" class="bg-indigo-600 text-white px-8 py-4 rounded-xl font-bold text-lg hover:bg-indigo-700 transition shadow-xl transform hover:-translate-y-1">
-                    Start Your Streak
+                <a href="{{ url_for('main.register') }}" class="bg-indigo-600 text-white px-8 py-4 rounded-xl font-bold text-lg hover:bg-indigo-700 transition shadow-xl shadow-indigo-600/30 transform hover:-translate-y-1 flex items-center justify-center">
+                    Start Your Streak <i class="fas fa-arrow-right ml-2"></i>
                 </a>
-                <a href="#features" class="px-8 py-4 rounded-xl font-bold text-gray-600 border border-gray-200 hover:bg-gray-50 transition">
-                    Learn More
+                <a href="#features" class="px-8 py-4 rounded-xl font-bold text-gray-600 dark:text-gray-300 border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800 transition flex items-center justify-center">
+                    <i class="fas fa-play-circle mr-2"></i> How it Works
                 </a>
             </div>
-            <div class="mt-8 flex items-center justify-center lg:justify-start gap-4 text-sm text-gray-400 font-medium">
-                <span><i class="fas fa-check-circle text-green-500 mr-2"></i>Free Forever</span>
-                <span><i class="fas fa-check-circle text-green-500 mr-2"></i>No Credit Card</span>
+            
+            <div class="mt-10 flex items-center justify-center lg:justify-start gap-6 text-sm text-gray-500 dark:text-gray-400 font-medium">
+                <div class="flex -space-x-2">
+                    <div class="w-8 h-8 rounded-full bg-gray-200 border-2 border-white dark:border-dark-bg"></div>
+                    <div class="w-8 h-8 rounded-full bg-gray-300 border-2 border-white dark:border-dark-bg"></div>
+                    <div class="w-8 h-8 rounded-full bg-gray-400 border-2 border-white dark:border-dark-bg flex items-center justify-center text-[10px] text-white font-bold">+1k</div>
+                </div>
+                <p>Join 1,000+ consistent builders</p>
             </div>
         </div>
 
-        <div class="lg:w-1/2 mt-16 lg:mt-0 relative">
-            <div class="relative z-10 bg-white rounded-2xl shadow-2xl border border-gray-100 p-6 transform rotate-2 hover:rotate-0 transition duration-500 floating">
-                <div class="flex justify-between items-center mb-6 border-b pb-4">
-                    <div class="flex gap-2">
-                        <div class="w-3 h-3 rounded-full bg-red-400"></div>
-                        <div class="w-3 h-3 rounded-full bg-yellow-400"></div>
-                        <div class="w-3 h-3 rounded-full bg-green-400"></div>
+        <div class="lg:w-1/2 mt-20 lg:mt-0 relative hidden md:block">
+            <div class="relative z-10 bg-white/80 dark:bg-dark-card/80 backdrop-blur-xl rounded-[2.5rem] shadow-2xl border border-white/50 dark:border-white/10 p-8 transform rotate-2 hover:rotate-0 transition duration-700 floating">
+                <div class="flex justify-between items-center mb-8">
+                    <div>
+                        <div class="text-xs font-bold text-gray-400 uppercase tracking-wider">Today's Focus</div>
+                        <div class="text-2xl font-bold text-gray-900 dark:text-white">Wednesday, Jan 15</div>
                     </div>
-                    <div class="text-xs font-bold text-gray-300">DASHBOARD_PREVIEW</div>
+                    <div class="w-10 h-10 bg-indigo-100 dark:bg-indigo-500/20 rounded-full flex items-center justify-center text-indigo-600 dark:text-indigo-400">
+                        <i class="fas fa-bell"></i>
+                    </div>
                 </div>
                 
                 <div class="space-y-4">
-                    <div class="flex items-center p-4 bg-gray-50 rounded-xl border-l-4 border-indigo-500">
-                        <div class="w-10 h-10 bg-indigo-100 rounded-full flex items-center justify-center text-indigo-600 mr-4">
-                            <i class="fas fa-book"></i>
+                    <div class="flex items-center p-5 bg-white dark:bg-black/20 rounded-2xl shadow-sm border border-gray-100 dark:border-white/5">
+                        <div class="w-12 h-12 bg-blue-100 dark:bg-blue-500/20 rounded-xl flex items-center justify-center text-blue-600 dark:text-blue-400 mr-5 text-xl">
+                            <i class="fas fa-book-open"></i>
                         </div>
                         <div class="flex-1">
-                            <div class="h-2 w-24 bg-gray-200 rounded mb-2"></div>
-                            <div class="h-2 w-16 bg-gray-100 rounded"></div>
+                            <div class="font-bold text-gray-800 dark:text-gray-200">Read 20 Pages</div>
+                            <div class="text-xs text-gray-400 mt-1">Study & Learning</div>
                         </div>
-                        <div class="text-orange-500 font-bold">🔥 12</div>
+                        <div class="text-orange-500 font-bold bg-orange-50 dark:bg-orange-500/10 px-3 py-1 rounded-lg">🔥 12</div>
                     </div>
-                    <div class="flex items-center p-4 bg-gray-50 rounded-xl border-l-4 border-green-500 opacity-75">
-                        <div class="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center text-green-600 mr-4">
-                            <i class="fas fa-dumbbell"></i>
+
+                    <div class="flex items-center p-5 bg-white dark:bg-black/20 rounded-2xl shadow-sm border border-gray-100 dark:border-white/5 opacity-80">
+                        <div class="w-12 h-12 bg-green-100 dark:bg-green-500/20 rounded-xl flex items-center justify-center text-green-600 dark:text-green-400 mr-5 text-xl">
+                            <i class="fas fa-running"></i>
                         </div>
                         <div class="flex-1">
-                            <div class="h-2 w-20 bg-gray-200 rounded mb-2"></div>
-                            <div class="h-2 w-32 bg-gray-100 rounded"></div>
+                            <div class="font-bold text-gray-800 dark:text-gray-200">Morning Run</div>
+                            <div class="text-xs text-gray-400 mt-1">Health</div>
                         </div>
-                        <div class="text-gray-300"><i class="fas fa-check"></i></div>
+                        <div class="text-green-500 text-xl"><i class="fas fa-check-circle"></i></div>
                     </div>
                 </div>
                 
-                <div class="absolute -bottom-6 -left-6 bg-white p-4 rounded-xl shadow-lg border border-gray-100 flex items-center gap-3 animate-bounce">
-                    <div class="text-3xl">🏆</div>
+                <div class="absolute -bottom-8 -left-8 bg-white dark:bg-gray-800 p-5 rounded-2xl shadow-xl border border-gray-100 dark:border-gray-700 flex items-center gap-4 animate-bounce">
+                    <div class="text-4xl">🏆</div>
                     <div>
-                        <div class="text-xs font-bold text-gray-400 uppercase">Achievement</div>
-                        <div class="font-bold text-indigo-900">7 Day Streak!</div>
+                        <div class="text-[10px] font-bold text-gray-400 uppercase tracking-wider">New Unlock</div>
+                        <div class="font-bold text-indigo-900 dark:text-white text-lg">Consistency King</div>
                     </div>
                 </div>
             </div>
         </div>
     </header>
 
-    <section id="features" class="bg-gray-50 py-24">
+    <div class="border-y border-gray-200 dark:border-white/5 bg-white dark:bg-white/5 py-12">
+        <div class="max-w-7xl mx-auto px-6 grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
+            <div>
+                <div class="text-3xl font-black text-gray-900 dark:text-white mb-1">10k+</div>
+                <div class="text-xs font-bold text-gray-500 uppercase tracking-widest">Habits Tracked</div>
+            </div>
+            <div>
+                <div class="text-3xl font-black text-gray-900 dark:text-white mb-1">85%</div>
+                <div class="text-xs font-bold text-gray-500 uppercase tracking-widest">Completion Rate</div>
+            </div>
+            <div>
+                <div class="text-3xl font-black text-gray-900 dark:text-white mb-1">4.9/5</div>
+                <div class="text-xs font-bold text-gray-500 uppercase tracking-widest">User Rating</div>
+            </div>
+            <div>
+                <div class="text-3xl font-black text-gray-900 dark:text-white mb-1">24/7</div>
+                <div class="text-xs font-bold text-gray-500 uppercase tracking-widest">Uptime</div>
+            </div>
+        </div>
+    </div>
+
+    <section id="features" class="py-32 bg-gray-50 dark:bg-black/20">
         <div class="max-w-7xl mx-auto px-6">
-            <div class="text-center mb-16">
-                <h2 class="text-3xl font-bold text-gray-900 mb-4">Everything you need to win</h2>
-                <p class="text-gray-500 max-w-2xl mx-auto">We combined the best productivity methods into one simple interface.</p>
+            <div class="text-center max-w-3xl mx-auto mb-20">
+                <span class="text-indigo-600 dark:text-indigo-400 font-bold uppercase tracking-widest text-xs">Features</span>
+                <h2 class="text-4xl font-extrabold text-gray-900 dark:text-white mt-3 mb-6">Everything you need to win the day.</h2>
+                <p class="text-gray-500 dark:text-gray-400 text-lg">We replaced the boring spreadsheets with a system that feels like a video game for your life.</p>
             </div>
 
             <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
-                <div class="bg-white p-8 rounded-2xl shadow-sm border border-gray-100 hover:shadow-md transition">
-                    <div class="w-12 h-12 bg-indigo-100 text-indigo-600 rounded-xl flex items-center justify-center text-xl mb-6">
+                <div class="bg-white dark:bg-dark-card p-8 rounded-[2rem] shadow-sm border border-gray-100 dark:border-white/5 hover:shadow-xl transition duration-300 group">
+                    <div class="w-14 h-14 bg-indigo-100 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 rounded-2xl flex items-center justify-center text-2xl mb-6 group-hover:scale-110 transition">
                         <i class="fas fa-gamepad"></i>
                     </div>
-                    <h3 class="text-xl font-bold text-gray-900 mb-2">Gamified Stats</h3>
-                    <p class="text-gray-500 leading-relaxed">Level up your RPG stats (Strength, Intellect, Focus) as you complete real-world tasks.</p>
+                    <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-3">Gamified Stats</h3>
+                    <p class="text-gray-500 dark:text-gray-400 leading-relaxed">
+                        Level up your RPG stats (Strength, Intellect, Focus) automatically as you complete real-world tasks.
+                    </p>
                 </div>
 
-                <div class="bg-white p-8 rounded-2xl shadow-sm border border-gray-100 hover:shadow-md transition">
-                    <div class="w-12 h-12 bg-purple-100 text-purple-600 rounded-xl flex items-center justify-center text-xl mb-6">
+                <div class="bg-white dark:bg-dark-card p-8 rounded-[2rem] shadow-sm border border-gray-100 dark:border-white/5 hover:shadow-xl transition duration-300 group">
+                    <div class="w-14 h-14 bg-purple-100 dark:bg-purple-900/30 text-purple-600 dark:text-purple-400 rounded-2xl flex items-center justify-center text-2xl mb-6 group-hover:scale-110 transition">
+                        <i class="fas fa-chart-pie"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-3">Visual Analytics</h3>
+                    <p class="text-gray-500 dark:text-gray-400 leading-relaxed">
+                        Beautiful heatmaps and trend lines visualize your consistency over time. See your year in pixels.
+                    </p>
+                </div>
+
+                <div class="bg-white dark:bg-dark-card p-8 rounded-[2rem] shadow-sm border border-gray-100 dark:border-white/5 hover:shadow-xl transition duration-300 group">
+                    <div class="w-14 h-14 bg-pink-100 dark:bg-pink-900/30 text-pink-600 dark:text-pink-400 rounded-2xl flex items-center justify-center text-2xl mb-6 group-hover:scale-110 transition">
                         <i class="fas fa-stopwatch"></i>
                     </div>
-                    <h3 class="text-xl font-bold text-gray-900 mb-2">Focus Timer</h3>
-                    <p class="text-gray-500 leading-relaxed">Built-in Pomodoro timer to help you get into the flow state immediately.</p>
-                </div>
-
-                <div class="bg-white p-8 rounded-2xl shadow-sm border border-gray-100 hover:shadow-md transition">
-                    <div class="w-12 h-12 bg-green-100 text-green-600 rounded-xl flex items-center justify-center text-xl mb-6">
-                        <i class="fas fa-chart-line"></i>
-                    </div>
-                    <h3 class="text-xl font-bold text-gray-900 mb-2">Visual Analytics</h3>
-                    <p class="text-gray-500 leading-relaxed">Beautiful heatmaps and trend lines to visualize your consistency over time.</p>
+                    <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-3">Focus Timer</h3>
+                    <p class="text-gray-500 dark:text-gray-400 leading-relaxed">
+                        Built-in Pomodoro timer helps you enter deep work mode instantly. Track time and habits in one place.
+                    </p>
                 </div>
             </div>
         </div>
     </section>
 
-    <footer class="bg-white border-t border-gray-100 py-12 text-center">
-        <p class="text-gray-400 font-medium">&copy; 2026 HabitPro. Built for builders.</p>
+    <section class="py-32 bg-white dark:bg-dark-bg">
+        <div class="max-w-7xl mx-auto px-6">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-16 items-center">
+                <div>
+                    <h2 class="text-4xl font-extrabold text-gray-900 dark:text-white mb-8">Simple path to mastery.</h2>
+                    
+                    <div class="space-y-8">
+                        <div class="flex gap-6">
+                            <div class="w-10 h-10 rounded-full bg-indigo-600 text-white flex items-center justify-center font-bold text-lg flex-shrink-0">1</div>
+                            <div>
+                                <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-2">Define your identity</h3>
+                                <p class="text-gray-500 dark:text-gray-400">Choose from templates like "Reader", "Runner", or "Coder", or create custom habits.</p>
+                            </div>
+                        </div>
+                        <div class="flex gap-6">
+                            <div class="w-10 h-10 rounded-full bg-indigo-600 text-white flex items-center justify-center font-bold text-lg flex-shrink-0">2</div>
+                            <div>
+                                <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-2">Track daily progress</h3>
+                                <p class="text-gray-500 dark:text-gray-400">Check off tasks, log numbers, or use the timer. Watch your streak fire up.</p>
+                            </div>
+                        </div>
+                        <div class="flex gap-6">
+                            <div class="w-10 h-10 rounded-full bg-indigo-600 text-white flex items-center justify-center font-bold text-lg flex-shrink-0">3</div>
+                            <div>
+                                <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-2">Unlock insights</h3>
+                                <p class="text-gray-500 dark:text-gray-400">Get weekly AI reports and visualize your long-term growth on the calendar.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="bg-gray-100 dark:bg-dark-card rounded-3xl p-8 border border-gray-200 dark:border-white/5 relative">
+                    <div class="absolute -top-10 -right-10 text-9xl text-indigo-50 dark:text-white/5 z-0">
+                        <i class="fas fa-quote-right"></i>
+                    </div>
+                    <p class="text-xl text-gray-600 dark:text-gray-300 italic mb-6 relative z-10">
+                        "HabitPro changed how I view my day. Instead of a to-do list, it feels like I'm leveling up a character in a game. I haven't missed a day of coding in 3 months."
+                    </p>
+                    <div class="flex items-center gap-4">
+                        <div class="w-12 h-12 bg-gray-300 rounded-full"></div>
+                        <div>
+                            <div class="font-bold text-gray-900 dark:text-white">Alex M.</div>
+                            <div class="text-xs text-indigo-500 font-bold uppercase">Software Engineer</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="py-20 px-6">
+        <div class="max-w-5xl mx-auto bg-indigo-600 dark:bg-indigo-900 rounded-[3rem] p-12 md:p-20 text-center text-white relative overflow-hidden shadow-2xl">
+            <div class="blob bg-white opacity-20 w-96 h-96 top-0 left-0"></div>
+            
+            <div class="relative z-10">
+                <h2 class="text-4xl md:text-5xl font-black mb-6">Ready to level up your life?</h2>
+                <p class="text-indigo-100 text-lg mb-10 max-w-2xl mx-auto">Join the community of builders, learners, and achievers today. No credit card required.</p>
+                <a href="{{ url_for('main.register') }}" class="bg-white text-indigo-600 px-10 py-4 rounded-xl font-bold text-lg hover:bg-gray-100 transition shadow-xl inline-block transform hover:-translate-y-1">
+                    Get Started for Free
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <footer class="bg-white dark:bg-dark-card border-t border-gray-200 dark:border-white/10 mt-auto transition-colors duration-300 relative z-10">
+        <div class="max-w-7xl mx-auto px-6 py-16">
+            <div class="grid grid-cols-1 md:grid-cols-12 gap-12">
+                
+                <div class="md:col-span-4">
+                    <a href="/" class="flex items-center gap-2 mb-4">
+                        <div class="w-8 h-8 bg-indigo-600 rounded-lg flex items-center justify-center text-white">
+                            <i class="fas fa-layer-group text-sm"></i>
+                        </div>
+                        <span class="text-xl font-extrabold text-gray-900 dark:text-white">HabitPro</span>
+                    </a>
+                    <p class="text-gray-500 dark:text-gray-400 text-sm mb-6 leading-relaxed">
+                        Master your daily routine with AI-powered insights and gamified tracking. Built for consistency.
+                    </p>
+                    
+                    <div class="bg-gray-50 dark:bg-white/5 p-5 rounded-2xl border border-gray-100 dark:border-white/10">
+                        <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-3">Designed & Built By</p>
+                        <div class="flex items-center gap-4">
+                            <div class="w-12 h-12 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white font-bold text-lg shadow-lg">
+                                SS
+                            </div>
+                            <div>
+                                <p class="text-base font-bold text-gray-900 dark:text-white">Siddharth Sundram</p>
+                                <p class="text-xs text-indigo-500 dark:text-indigo-400 font-medium">Full Stack Developer</p>
+                            </div>
+                        </div>
+
+                        <div class="flex gap-3 mt-4">
+                            <a href="#" target="_blank" class="w-8 h-8 rounded-lg bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 flex items-center justify-center text-gray-500 hover:text-blue-600 dark:hover:text-blue-400 hover:border-blue-200 transition shadow-sm">
+                                <i class="fab fa-linkedin-in"></i>
+                            </a>
+                            <a href="#" target="_blank" class="w-8 h-8 rounded-lg bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 flex items-center justify-center text-gray-500 hover:text-pink-600 dark:hover:text-pink-400 hover:border-pink-200 transition shadow-sm">
+                                <i class="fab fa-instagram"></i>
+                            </a>
+                            <a href="mailto:sidsundram@gmail.com" class="w-8 h-8 rounded-lg bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 flex items-center justify-center text-gray-500 hover:text-red-500 dark:hover:text-red-400 hover:border-red-200 transition shadow-sm">
+                                <i class="fas fa-envelope"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="md:col-span-3 md:pl-8">
+                    <h3 class="font-bold text-gray-900 dark:text-white mb-6">Explore</h3>
+                    <ul class="space-y-4 text-sm font-medium text-gray-500 dark:text-gray-400">
+                        <li><a href="/" class="hover:text-indigo-600 dark:hover:text-white transition">Home</a></li>
+                        <li><a href="{{ url_for('main.about') }}" class="hover:text-indigo-600 dark:hover:text-white transition">About Us</a></li>
+                        <li><a href="{{ url_for('main.privacy') }}" class="hover:text-indigo-600 dark:hover:text-white transition">Privacy Policy</a></li>
+                        <li><a href="{{ url_for('main.terms') }}" class="hover:text-indigo-600 dark:hover:text-white transition">Terms of Service</a></li>
+                    </ul>
+                </div>
+
+                <div class="md:col-span-5">
+                    <h3 class="font-bold text-gray-900 dark:text-white mb-2">Feedback & Support</h3>
+                    <p class="text-xs text-gray-500 dark:text-gray-400 mb-4">Found a bug or have a suggestion? Email me directly.</p>
+                    
+                    <form action="{{ url_for('main.submit_feedback') }}" method="POST" class="space-y-3">
+                        <input type="email" name="email" placeholder="Your Email Address" required
+                               class="w-full px-4 py-3 rounded-xl bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 text-sm focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 outline-none transition text-gray-800 dark:text-white placeholder-gray-400">
+                        
+                        <div class="relative">
+                            <textarea name="message" rows="3" placeholder="Type your message here..." required
+                                      class="w-full px-4 py-3 rounded-xl bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 text-sm focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 outline-none transition text-gray-800 dark:text-white placeholder-gray-400 resize-none"></textarea>
+                            <button type="submit" class="absolute bottom-2 right-2 bg-indigo-600 text-white w-8 h-8 rounded-lg flex items-center justify-center hover:bg-indigo-700 transition shadow-md">
+                                <i class="fas fa-paper-plane text-xs"></i>
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            
+            <div class="border-t border-gray-200 dark:border-white/10 mt-16 pt-8 text-center">
+                <p class="text-gray-400 text-xs font-medium">
+                    &copy; 2026 HabitPro. Developed with <i class="fas fa-heart text-red-500 mx-1"></i> by <span class="text-indigo-600 dark:text-indigo-400 font-bold">Siddharth Sundram</span>.
+                </p>
+            </div>
+        </div>
     </footer>
+
+    <script>
+        function toggleTheme() {
+            if (document.documentElement.classList.contains('dark')) {
+                document.documentElement.classList.remove('dark');
+                localStorage.theme = 'light';
+            } else {
+                document.documentElement.classList.add('dark');
+                localStorage.theme = 'dark';
+            }
+        }
+        
+        // Auto-dismiss Flash messages
+        document.addEventListener('DOMContentLoaded', () => {
+            const alerts = document.querySelectorAll('.flash-message');
+            if (alerts.length > 0) setTimeout(() => alerts.forEach(a => a.remove()), 4000);
+        });
+    </script>
 
 </body>
 </html>

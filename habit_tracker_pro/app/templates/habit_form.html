@@ -1,61 +1,112 @@
 {% extends "base.html" %}
 {% block content %}
-<div class="max-w-xl mx-auto bg-white p-8 rounded-xl shadow-md">
-    <h2 class="text-2xl font-bold mb-6 text-gray-800">Design Your Habit</h2>
+
+<div class="max-w-2xl mx-auto animate-fade-in">
     
-    <form method="POST">
-        <div class="mb-4">
-            <label class="block text-gray-700 text-sm font-bold mb-2">Habit Name</label>
-            <input type="text" name="name" placeholder="e.g. Read Books" class="w-full p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500" required>
-        </div>
+    <div class="text-center mb-10">
+        <h1 class="text-4xl font-extrabold text-gray-900 dark:text-white mb-2 tracking-tight">Design Your Habit</h1>
+        <p class="text-gray-500 dark:text-gray-400 text-lg">Start small, dream big. What will you build today?</p>
+    </div>
+
+    <div class="bg-white dark:bg-dark-card p-8 md:p-10 rounded-[2rem] shadow-xl border border-gray-100 dark:border-dark-border transition-colors duration-300 relative overflow-hidden">
         
-        <div class="mb-4">
-            <label class="block text-gray-700 text-sm font-bold mb-2">Category</label>
-            <select name="category" class="w-full p-3 border rounded-lg bg-white">
-                <option value="Health">Health & Fitness</option>
-                <option value="Study">Study & Learning</option>
-                <option value="Work">Deep Work</option>
-                <option value="Mindfulness">Mindfulness</option>
-            </select>
-        </div>
+        <div class="absolute top-0 right-0 w-64 h-64 bg-indigo-50 dark:bg-indigo-900/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2 pointer-events-none"></div>
 
-        <div class="mb-6 p-4 bg-gray-50 rounded-lg border">
-            <label class="block text-gray-700 text-sm font-bold mb-2">How will you track this?</label>
+        <form method="POST" class="relative z-10">
             
-            <div class="flex gap-4 mb-4">
-                <label class="flex items-center cursor-pointer">
-                    <input type="radio" name="habit_type" value="boolean" checked onclick="toggleNumeric(false)" class="mr-2">
-                    <span>Yes / No (Checkbox)</span>
-                </label>
-                <label class="flex items-center cursor-pointer">
-                    <input type="radio" name="habit_type" value="numeric" onclick="toggleNumeric(true)" class="mr-2">
-                    <span>Numeric (Target Value)</span>
-                </label>
-            </div>
-
-            <div id="numeric-options" class="hidden grid grid-cols-2 gap-4">
-                <div>
-                    <label class="text-xs font-bold text-gray-500">Target Number</label>
-                    <input type="number" name="target_value" value="1" class="w-full p-2 border rounded">
-                </div>
-                <div>
-                    <label class="text-xs font-bold text-gray-500">Unit (Optional)</label>
-                    <input type="text" name="unit" placeholder="mins, pages, ml" class="w-full p-2 border rounded">
+            <div class="mb-8">
+                <label class="block text-xs font-bold text-gray-400 uppercase tracking-widest mb-3">Habit Name</label>
+                <div class="relative group">
+                    <i class="fas fa-pencil-alt absolute left-4 top-4 text-gray-400 group-focus-within:text-indigo-500 transition"></i>
+                    <input type="text" name="name" placeholder="e.g. Read 10 Pages, Drink Water, Code..." 
+                           class="w-full p-4 pl-12 bg-gray-50 dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700 rounded-2xl focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 outline-none transition font-bold text-gray-900 dark:text-white text-lg placeholder-gray-400" required>
                 </div>
             </div>
-        </div>
+            
+            <div class="mb-8">
+                <label class="block text-xs font-bold text-gray-400 uppercase tracking-widest mb-3">Category</label>
+                <div class="relative group">
+                    <i class="fas fa-tag absolute left-4 top-4 text-gray-400 group-focus-within:text-indigo-500 transition"></i>
+                    <select name="category" class="w-full p-4 pl-12 bg-gray-50 dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700 rounded-2xl focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 outline-none transition font-bold text-gray-900 dark:text-white appearance-none cursor-pointer">
+                        <option value="Health">Health & Fitness</option>
+                        <option value="Study">Study & Learning</option>
+                        <option value="Work">Deep Work</option>
+                        <option value="Mindfulness">Mindfulness</option>
+                    </select>
+                    <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-5 text-gray-500">
+                        <i class="fas fa-chevron-down text-xs"></i>
+                    </div>
+                </div>
+            </div>
 
-        <button type="submit" class="w-full bg-indigo-600 text-white font-bold py-3 rounded-lg hover:bg-indigo-700 transition">
-            Create Habit
-        </button>
-    </form>
+            <div class="mb-10 p-6 bg-indigo-50 dark:bg-indigo-900/10 rounded-3xl border border-indigo-100 dark:border-indigo-500/20">
+                <label class="block text-indigo-900 dark:text-indigo-300 font-bold mb-5 flex items-center">
+                    <i class="fas fa-bullseye mr-2"></i> How will you track this?
+                </label>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                    <label class="cursor-pointer relative">
+                        <input type="radio" name="habit_type" value="boolean" checked onclick="toggleNumeric(false)" class="peer sr-only">
+                        <div class="p-4 rounded-2xl border-2 border-transparent bg-white dark:bg-gray-800 peer-checked:border-indigo-500 peer-checked:ring-4 peer-checked:ring-indigo-500/20 transition hover:shadow-md flex items-center gap-4 group">
+                            <div class="w-12 h-12 rounded-xl bg-green-100 dark:bg-green-900/30 flex items-center justify-center text-green-600 dark:text-green-400 text-xl group-hover:scale-110 transition">
+                                <i class="fas fa-check"></i>
+                            </div>
+                            <div>
+                                <div class="font-bold text-gray-800 dark:text-white text-base">Yes / No</div>
+                                <div class="text-xs text-gray-500 dark:text-gray-400 font-medium">Simple checkbox</div>
+                            </div>
+                        </div>
+                    </label>
+
+                    <label class="cursor-pointer relative">
+                        <input type="radio" name="habit_type" value="numeric" onclick="toggleNumeric(true)" class="peer sr-only">
+                        <div class="p-4 rounded-2xl border-2 border-transparent bg-white dark:bg-gray-800 peer-checked:border-indigo-500 peer-checked:ring-4 peer-checked:ring-indigo-500/20 transition hover:shadow-md flex items-center gap-4 group">
+                            <div class="w-12 h-12 rounded-xl bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center text-blue-600 dark:text-blue-400 text-xl group-hover:scale-110 transition">
+                                <i class="fas fa-sort-numeric-up"></i>
+                            </div>
+                            <div>
+                                <div class="font-bold text-gray-800 dark:text-white text-base">Numeric Target</div>
+                                <div class="text-xs text-gray-500 dark:text-gray-400 font-medium">Pages, Minutes, etc.</div>
+                            </div>
+                        </div>
+                    </label>
+                </div>
+
+                <div id="numeric-options" class="hidden animate-fade-in border-t border-indigo-200 dark:border-indigo-500/30 pt-6 mt-2">
+                    <div class="grid grid-cols-2 gap-6">
+                        <div>
+                            <label class="block text-xs font-bold text-indigo-400 uppercase tracking-wider mb-2">Target Number</label>
+                            <input type="number" name="target_value" value="1" class="w-full p-3 bg-white dark:bg-gray-800 border border-indigo-200 dark:border-indigo-500/30 rounded-xl focus:border-indigo-500 outline-none font-bold text-gray-800 dark:text-white text-center text-lg">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-indigo-400 uppercase tracking-wider mb-2">Unit</label>
+                            <input type="text" name="unit" placeholder="mins, pages..." class="w-full p-3 bg-white dark:bg-gray-800 border border-indigo-200 dark:border-indigo-500/30 rounded-xl focus:border-indigo-500 outline-none font-bold text-gray-800 dark:text-white text-center text-lg">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <button type="submit" class="w-full bg-gray-900 dark:bg-white text-white dark:text-gray-900 p-5 rounded-2xl font-bold hover:bg-black dark:hover:bg-gray-200 transition shadow-xl hover:shadow-2xl hover:shadow-indigo-500/20 transform hover:-translate-y-1 flex items-center justify-center text-lg tracking-wide group">
+                <i class="fas fa-rocket mr-3 group-hover:animate-pulse"></i> Launch Habit
+            </button>
+            
+            <div class="mt-6 text-center">
+                <a href="{{ url_for('main.dashboard') }}" class="text-sm font-bold text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition">Cancel</a>
+            </div>
+        </form>
+    </div>
 </div>
 
 <script>
     function toggleNumeric(show) {
         const el = document.getElementById('numeric-options');
-        if (show) el.classList.remove('hidden');
-        else el.classList.add('hidden');
+        if (show) {
+            el.classList.remove('hidden');
+            // Focus on input for better UX
+            setTimeout(() => el.querySelector('input').focus(), 100);
+        } else {
+            el.classList.add('hidden');
+        }
     }
 </script>
 {% endblock %}
