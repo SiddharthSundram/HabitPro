@@ -2,30 +2,45 @@ from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager
 from config import Config
+from flask_wtf.csrf import CSRFProtect 
+from flask_mail import Mail
+from flask_limiter import Limiter
+from flask_limiter.util import get_remote_address
 
-# Initialize Extensions
+# Initialize Extensions GLOBALLY
 db = SQLAlchemy()
 login_manager = LoginManager()
-login_manager.login_view = 'main.login' 
+login_manager.login_view = 'main.login' # Redirects here if not logged in
+login_manager.login_message_category = 'error'
+csrf = CSRFProtect()
+mail = Mail()
+
+# Define Limiter here so it can be imported in routes.py
+limiter = Limiter(key_func=get_remote_address, default_limits=["200 per day", "50 per hour"])
 
 def create_app(config_class=Config):
     app = Flask(__name__)
     app.config.from_object(config_class)
 
-    # Init Extensions
+    # Init Extensions with the app
     db.init_app(app)
     login_manager.init_app(app)
-
+    csrf.init_app(app)
+    mail.init_app(app)
+    limiter.init_app(app) # Bind the limiter to the app
+    
     # Register Blueprints
     from app.routes import main
     app.register_blueprint(main)
 
     # Create DB Tables
     with app.app_context():
+        # Import ALL models here so SQLAlchemy detects them
+        from app.models import User, Habit, DailyLog, Achievement, UserAchievement, Feedback
+        
         db.create_all()
 
-        # SEED ACHIEVEMENTS
-        from app.models import Achievement
+        # SEED ACHIEVEMENTS (Only if empty)
         if not Achievement.query.first():
             badges = [
                 Achievement(name="First Step", description="Log your first habit", icon="fas fa-shoe-prints", criteria_type="total_logs", threshold=1, color="text-blue-500"),

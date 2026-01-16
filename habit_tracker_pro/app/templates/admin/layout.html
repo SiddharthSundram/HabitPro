@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HabitPro Admin</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;700;800&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: { extend: { fontFamily: { sans: ['Outfit', 'sans-serif'] } } }
+        }
+    </script>
+</head>
+<body class="bg-gray-900 text-gray-100 font-sans flex min-h-screen">
+
+    <aside class="w-64 bg-gray-800 border-r border-gray-700 flex-shrink-0 fixed h-full">
+        <div class="p-6 border-b border-gray-700">
+            <a href="/" class="flex items-center gap-3 text-white">
+                <div class="w-8 h-8 bg-indigo-500 rounded-lg flex items-center justify-center">
+                    <i class="fas fa-shield-alt"></i>
+                </div>
+                <span class="text-xl font-bold">Admin Panel</span>
+            </a>
+        </div>
+        <nav class="p-4 space-y-2">
+            <a href="{{ url_for('main.admin_dashboard') }}" class="block px-4 py-3 rounded-xl hover:bg-gray-700 text-gray-300 hover:text-white transition {{ 'bg-indigo-600 text-white' if request.endpoint == 'main.admin_dashboard' }}">
+                <i class="fas fa-chart-line w-6"></i> Dashboard
+            </a>
+            <a href="{{ url_for('main.admin_users') }}" class="block px-4 py-3 rounded-xl hover:bg-gray-700 text-gray-300 hover:text-white transition {{ 'bg-indigo-600 text-white' if request.endpoint == 'main.admin_users' }}">
+                <i class="fas fa-users w-6"></i> Users
+            </a>
+            <a href="{{ url_for('main.admin_feedback') }}" class="block px-4 py-3 rounded-xl hover:bg-gray-700 text-gray-300 hover:text-white transition {{ 'bg-indigo-600 text-white' if request.endpoint == 'main.admin_feedback' }}">
+                <i class="fas fa-comments w-6"></i> Feedback
+            </a>
+            <div class="border-t border-gray-700 my-4"></div>
+            <a href="{{ url_for('main.dashboard') }}" class="block px-4 py-3 rounded-xl hover:bg-gray-700 text-gray-400 hover:text-white transition">
+                <i class="fas fa-arrow-left w-6"></i> Back to App
+            </a>
+        </nav>
+    </aside>
+
+    <main class="flex-1 ml-64 p-8">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="mb-6 p-4 rounded-xl border border-white/10 {% if category=='error' %}bg-red-500/20 text-red-200{% else %}bg-green-500/20 text-green-200{% endif %}">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        {% block admin_content %}{% endblock %}
+    </main>
+
+</body>
+</html>

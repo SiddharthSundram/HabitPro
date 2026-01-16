@@ -1,0 +1,51 @@
+{% extends "admin/layout.html" %}
+{% block admin_content %}
+
+<div class="flex justify-between items-center mb-8">
+    <h1 class="text-3xl font-bold">User Management</h1>
+    <span class="bg-gray-800 px-4 py-2 rounded-lg text-sm font-mono text-gray-400">{{ users|length }} Total</span>
+</div>
+
+<div class="bg-gray-800 rounded-3xl border border-gray-700 overflow-hidden">
+    <table class="w-full text-left">
+        <thead>
+            <tr class="bg-gray-700/50 text-gray-400 text-xs uppercase">
+                <th class="p-4">ID</th>
+                <th class="p-4">User</th>
+                <th class="p-4">Habits</th>
+                <th class="p-4">Admin?</th>
+                <th class="p-4 text-right">Actions</th>
+            </tr>
+        </thead>
+        <tbody class="divide-y divide-gray-700">
+            {% for user in users %}
+            <tr class="hover:bg-gray-700/30 transition group">
+                <td class="p-4 text-gray-500">#{{ user.id }}</td>
+                <td class="p-4">
+                    <div class="font-bold text-white">{{ user.username }}</div>
+                    <div class="text-xs text-gray-500">{{ user.email }}</div>
+                </td>
+                <td class="p-4 font-mono text-indigo-300">{{ user.habits.count() }}</td>
+                <td class="p-4">
+                    {% if user.is_admin %}
+                        <i class="fas fa-check-circle text-purple-500"></i>
+                    {% else %}
+                        <span class="text-gray-600">-</span>
+                    {% endif %}
+                </td>
+                <td class="p-4 text-right">
+                    {% if not user.is_admin %}
+                    <a href="{{ url_for('main.admin_delete_user', user_id=user.id) }}" 
+                       onclick="return confirm('Are you sure? This will perform a HARD DELETE on {{ user.username }}.')"
+                       class="text-red-400 hover:text-red-300 hover:bg-red-500/20 px-3 py-1.5 rounded-lg transition text-sm font-bold">
+                        <i class="fas fa-trash"></i> Ban
+                    </a>
+                    {% endif %}
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+{% endblock %}

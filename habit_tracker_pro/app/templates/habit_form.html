@@ -13,6 +13,7 @@
         <div class="absolute top-0 right-0 w-64 h-64 bg-indigo-50 dark:bg-indigo-900/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2 pointer-events-none"></div>
 
         <form method="POST" class="relative z-10">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
             
             <div class="mb-8">
                 <label class="block text-xs font-bold text-gray-400 uppercase tracking-widest mb-3">Habit Name</label>

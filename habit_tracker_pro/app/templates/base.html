@@ -10,7 +10,7 @@
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;700;800&display=swap" rel="stylesheet">
-    
+    <link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}">
     <link rel="manifest" href="{{ url_for('static', filename='manifest.json') }}">
     <meta name="theme-color" content="#4F46E5">
     <link rel="apple-touch-icon" href="{{ url_for('static', filename='icons/icon-192.png') }}">
@@ -183,9 +183,13 @@
                     <p class="text-xs text-gray-500 dark:text-gray-400 mb-4">Found a bug or have a suggestion? Email me directly.</p>
                     
                     <form action="{{ url_for('main.submit_feedback') }}" method="POST" class="space-y-3">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+                        
                         {% if not current_user.is_authenticated %}
                         <input type="email" name="email" placeholder="Your Email Address" required
-                               class="w-full px-4 py-3 rounded-xl bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 text-sm focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 outline-none transition text-gray-800 dark:text-white placeholder-gray-400">
+                               pattern="[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}$"
+                               title="Please enter a valid email address (e.g., user@example.com)"
+                               class="w-full px-4 py-3 rounded-xl bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 text-sm focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 outline-none transition text-gray-800 dark:text-white placeholder-gray-400 invalid:border-red-500 invalid:text-red-600 focus:invalid:border-red-500 focus:invalid:ring-red-500/20">
                         {% endif %}
                         <div class="relative">
                             <textarea name="message" rows="3" placeholder="Type your message here..." required

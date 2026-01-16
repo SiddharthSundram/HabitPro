@@ -1,0 +1,57 @@
+{% extends "admin/layout.html" %}
+{% block admin_content %}
+
+<h1 class="text-3xl font-bold mb-8">Overview</h1>
+
+<div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-10">
+    <div class="bg-gray-800 p-6 rounded-2xl border border-gray-700">
+        <div class="text-gray-400 text-sm font-bold uppercase tracking-wider mb-2">Total Users</div>
+        <div class="text-4xl font-black text-white">{{ total_users }}</div>
+    </div>
+    <div class="bg-gray-800 p-6 rounded-2xl border border-gray-700">
+        <div class="text-gray-400 text-sm font-bold uppercase tracking-wider mb-2">Total Habits</div>
+        <div class="text-4xl font-black text-indigo-400">{{ total_habits }}</div>
+    </div>
+    <div class="bg-gray-800 p-6 rounded-2xl border border-gray-700">
+        <div class="text-gray-400 text-sm font-bold uppercase tracking-wider mb-2">Activities Logged</div>
+        <div class="text-4xl font-black text-emerald-400">{{ total_logs }}</div>
+    </div>
+    <div class="bg-gray-800 p-6 rounded-2xl border border-gray-700">
+        <div class="text-gray-400 text-sm font-bold uppercase tracking-wider mb-2">Feedback</div>
+        <div class="text-4xl font-black text-amber-400">{{ total_feedback }}</div>
+    </div>
+</div>
+
+<div class="bg-gray-800 rounded-3xl border border-gray-700 overflow-hidden">
+    <div class="p-6 border-b border-gray-700">
+        <h2 class="text-xl font-bold">Newest Members</h2>
+    </div>
+    <table class="w-full text-left">
+        <thead>
+            <tr class="bg-gray-700/50 text-gray-400 text-xs uppercase">
+                <th class="p-4">ID</th>
+                <th class="p-4">Username</th>
+                <th class="p-4">Email</th>
+                <th class="p-4">Status</th>
+            </tr>
+        </thead>
+        <tbody class="divide-y divide-gray-700">
+            {% for user in recent_users %}
+            <tr class="hover:bg-gray-700/30 transition">
+                <td class="p-4 text-gray-500">#{{ user.id }}</td>
+                <td class="p-4 font-bold">{{ user.username }}</td>
+                <td class="p-4 text-gray-400">{{ user.email }}</td>
+                <td class="p-4">
+                    {% if user.is_admin %}
+                    <span class="bg-purple-500/20 text-purple-300 px-2 py-1 rounded text-xs font-bold">Admin</span>
+                    {% else %}
+                    <span class="bg-green-500/20 text-green-300 px-2 py-1 rounded text-xs font-bold">User</span>
+                    {% endif %}
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+{% endblock %}

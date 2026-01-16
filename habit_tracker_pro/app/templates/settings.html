@@ -16,6 +16,7 @@
         </h2>
         
         <form method="POST">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
             <input type="hidden" name="action" value="update_info">
             
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
@@ -43,6 +44,7 @@
         </h2>
         
         <form method="POST">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
             <input type="hidden" name="action" value="change_password">
             
             <div class="mb-6">
@@ -80,6 +82,7 @@
         <p class="text-gray-500 dark:text-gray-400 mb-6">Type <strong>DELETE</strong> below to confirm.</p>
         
         <form method="POST">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
             <input type="hidden" name="action" value="delete_account">
             <input type="text" name="confirmation" placeholder="DELETE" class="w-full p-4 border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 rounded-xl mb-6 text-center tracking-widest font-bold dark:text-white focus:outline-none focus:ring-2 focus:ring-red-500">
             
